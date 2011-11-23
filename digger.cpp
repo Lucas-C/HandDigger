@@ -4,28 +4,23 @@
 #include <list>
 #include <GL/freeglut.h>
 
-#define PLANE_GROUND 0
-#define SPHERE_PLANET 1
-const float planetRadius = 6;
+#include "Macros.hpp"
 
-using namespace std;
+static const int	WINDOW_WIDTH		= 1024, 
+					WINDOW_HEIGHT		= 768,
+					REFRESH_PERIOD_IN_MS	= 1000 / 60;
 
-static const int	WINDOW_WIDTH=1024, 
-					WINDOW_HEIGHT=768;
+int		oldX		= 0,
+		oldY		= 0;
+float	rX			= 15,
+		rY			= 0;
+float	fps			= 0;
+int		startTime	= 0;
+int		totalFrames	= 0;
+int		state		= 1;
+float	dist		= -5;
 
-static const int refreshPeriodInMs = (int)(1000 / 60.f);
-
-static int						lastRefreshTimeInMs = 0;
-
-int oldX = 0, oldY = 0;
-float rX = 15, rY = 0;
-float fps = 0;
-int startTime = 0;
-int totalFrames = 0;
-int state = 1;
-float dist = -5;
-
-void SetOrthoForFont()
+void setOrthoForFont()
 {	
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -37,14 +32,14 @@ void SetOrthoForFont()
 	glLoadIdentity();
 }
 
-void ResetPerspectiveProjection() 
+void resetPerspectiveProjection() 
 {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void RenderSpacedBitmapString(
+void renderSpacedBitmapString(
 							  int x, 
 							  int y,
 							  int spacing, 
@@ -57,10 +52,11 @@ void RenderSpacedBitmapString(
 		glRasterPos2i(x1,y);
 		glutBitmapCharacter(font, *c);
 		x1 = x1 + glutBitmapWidth(font,*c) + spacing;
+		x1 = x1 + glutBitmapWidth(font,*c) + spacing;
 	}
 }
 
-void DrawVec(double x, double y, double z)
+void drawVec(double x, double y, double z)
 {
 	double norm = sqrt(x * x + y * y + z * z);
 	glPushMatrix();
@@ -77,7 +73,7 @@ void DrawVec(double x, double y, double z)
 	glPopMatrix();
 }
 
-void DrawAxes()
+void drawAxes()
 {	 
 	//To prevent the view from disturbed on repaint
 	//this push matrix call stores the current matrix state
@@ -89,7 +85,7 @@ void DrawAxes()
 			glutSolidCone(0.0325,0.2, 4,1);
 			//Draw label			
 			glTranslatef(0,0.0625,0.225f);
-			RenderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Z");
+			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Z");
 		glPopMatrix();					
 		glutSolidCone(0.0225,1, 4,1);
 
@@ -100,7 +96,7 @@ void DrawAxes()
 			glutSolidCone(0.0325,0.2, 4,1);
 			//Draw label
 			glTranslatef(0,0.0625,0.225f);
-			RenderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"X");
+			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"X");
 		glPopMatrix();					
 		glutSolidCone(0.0225,1, 4,1);
 
@@ -111,18 +107,17 @@ void DrawAxes()
 			glutSolidCone(0.0325,0.2, 4,1);
 			//Draw label
 			glTranslatef(0,0.0625,0.225f);
-			RenderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Y");
+			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Y");
 		glPopMatrix();					
 		glutSolidCone(0.0225,1, 4,1);	
 	glPopMatrix();
 }
 
-void DrawGrid(int GRID_SIZE)
+void drawGrid(int GRID_SIZE)
 {
 	glBegin(GL_LINES);
 	glColor3f(0.75f, 0.75f, 0.75f);
-	for(int i=-GRID_SIZE;i<=GRID_SIZE;i++)
-	{
+	for(int i=-GRID_SIZE;i<=GRID_SIZE;i++) {
 		glVertex3f((float)i,0,(float)-GRID_SIZE);
 		glVertex3f((float)i,0,(float)GRID_SIZE);
 
@@ -132,35 +127,18 @@ void DrawGrid(int GRID_SIZE)
 	glEnd();
 }
 
-void DrawBox(double size) {
-	glPushMatrix(); 
-		glutSolidCube(size);
-    glPopMatrix(); 
-}
-
-void DrawPlanet() {
-	glColor3f(0.75f, 0.75f, 0.75f);
-	glPushMatrix();
-		glutWireSphere(planetRadius, 30, 30);
-    glPopMatrix(); 
-}
-
-void DrawShape(double size) 
+void renderModels() 
 { 
-	DrawBox(size);
+	drawAxes();
+	drawGrid(10);
+	glutWireSphere(6, 30, 30);
+	
+	glEnable(GL_LIGHTING);
+		glutSolidCube(10);
+	glDisable(GL_LIGHTING);
 } 
 
-void DrawActor()
-{  
-	DrawShape(10);
-} 
-
-void RenderActors() 
-{ 
-	DrawActor();
-} 
-
-void InitGL() {
+void initGL() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -176,7 +154,7 @@ void InitGL() {
 	glDisable(GL_LIGHTING);
 }
 
-void OnReshape(int nw, int nh) {
+void onReshape(int nw, int nh) {
 	glViewport(0,0,nw, nh);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -186,19 +164,18 @@ void OnReshape(int nw, int nh) {
 
 #define MAX_PATH 127
 char buffer[MAX_PATH];
-void OnRender() {
+void onRender() {
 	//Calculate fps
 	totalFrames++;
 	int current = glutGet(GLUT_ELAPSED_TIME);
-	if((current-startTime)>1000)
-	{		
+	if((current - startTime) > 1000) {		
 		float elapsedTime = float(current-startTime);
 		fps = ((float)(totalFrames * 1000) / elapsedTime) ;
 		startTime = current;
 		totalFrames=0;
 	}
 
-	snprintf(buffer, MAX_PATH, "FPS: %3.2f",fps);
+	snprintf(buffer, MAX_PATH, "FPS: %3.2f", fps);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -206,34 +183,21 @@ void OnRender() {
 	glRotatef(rX,0,1,0);
 	glRotatef(rY,1,0,0);
 
-	//Draw the grid and axes
-	DrawAxes();
-#if (SPHERE_PLANET == 1)
-	DrawPlanet();
-#else
-	DrawGrid(10);
-#endif
-// 	DrawVec(gDir);
-	
 	glEnable(GL_LIGHTING);
-		RenderActors();
+		renderModels();
 	glDisable(GL_LIGHTING);
 
-	SetOrthoForFont();		
-		glColor3f(1,1,1);
-		//Show the fps
-		RenderSpacedBitmapString(20,20,0,GLUT_BITMAP_HELVETICA_12,buffer);
+	setOrthoForFont();
+	glColor3f(1,1,1);
+	//Show the fps
+	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 
-	ResetPerspectiveProjection();
+	resetPerspectiveProjection();
 
 	glutSwapBuffers();
 }
 
-void OnShutdown() {
-	cout << "ByeBye !\n";
-}
-
-void Mouse(int button, int s, int x, int y)
+void mouseCallback(int button, int s, int x, int y)
 {
 	oldX = x; 
 	oldY = y; 
@@ -245,7 +209,7 @@ void Mouse(int button, int s, int x, int y)
 		state = 1;
 }
 
-void Motion(int x, int y)
+void motionCallback(int x, int y)
 {
 	if (state == 0) {
 		dist *= (1 + (float)(y - oldY) / 60);
@@ -254,38 +218,30 @@ void Motion(int x, int y)
 		rY += (float)(y - oldY) / 5; 
 // 		float theta = 45 - rY / 180 * M_PI;
 // 		float phi = -rX / 180 * M_PI;
-// 		cout << "phi: " << phi << " | theta: " << theta << "\n";
-// 		gDir = PxVec3(
-// 			sin(theta) * sin(phi),
-// 			cos(theta),
-// 			sin(theta) * cos(phi)
-// 		);
+// 		std::cout << "phi: " << phi << " | theta: " << theta << "\n";
 	}
 	oldX = x;
 	oldY = y;
 }
 
-static void KeyboardCallback(unsigned char key, int x, int y)
+static void keyboardCallback(unsigned char key, int, int)
 {
-	(void)x;
-	(void)y;
 	switch(key)
 	{
 		case 8: // Backspace
 		case 127: // Delete
-			break;
 		case 27: // Echap
 			exit(0);
 			break;
 		default:
-			cout << "Key (" << (int)key << ") not handled.\n";
+			TRACE("Key (" << (int)key << ") not handled.");
 			break;
 	}
 }
 
-static void ArrowKeyCallback(int key, int x, int y)
+static void arrowKeyCallback(int key, int x, int y)
 {
-	KeyboardCallback((unsigned char)key, x, y);
+	keyboardCallback((unsigned char)key, x, y);
 }
 
 void refreshTimer(int millisec)
@@ -295,29 +251,27 @@ void refreshTimer(int millisec)
 }
 
 int main(int argc, char** argv) {
-	atexit(OnShutdown);
+// 	atexit(onShutdown);
 
-	cout << "Use the mouse to rotate the camera or zoom with the middle button pressed.\n";
-	cout << "Press the keys 1, 2, 3, 4 and space to create various things, delete to restart.\n";
+	TRACE("Use the mouse to rotate the camera or zoom with the middle button pressed.");
 	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-	glutSetWindow(glutCreateWindow("GLUT PhysX3 Demo"));
+	glutSetWindow(glutCreateWindow("DiggerHand prototype"));
 
-	glutDisplayFunc(OnRender);
-	glutTimerFunc(refreshPeriodInMs, refreshTimer, refreshPeriodInMs);
-	glutReshapeFunc(OnReshape);
+	glutDisplayFunc(onRender);
+	glutTimerFunc(REFRESH_PERIOD_IN_MS, refreshTimer, REFRESH_PERIOD_IN_MS);
+	glutReshapeFunc(onReshape);
 
-	glutKeyboardFunc(KeyboardCallback);
-	glutSpecialFunc(ArrowKeyCallback);
+	glutKeyboardFunc(keyboardCallback);
+	glutSpecialFunc(arrowKeyCallback);
 
-	glutMouseFunc(Mouse);
-	glutMotionFunc(Motion);
+	glutMouseFunc(mouseCallback);
+	glutMotionFunc(motionCallback);
 
-	InitGL();
+	initGL();
 
-	lastRefreshTimeInMs = glutGet(GLUT_ELAPSED_TIME);
 	glutMainLoop();
 	
 	return 0;

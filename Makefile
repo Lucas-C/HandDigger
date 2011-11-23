@@ -31,6 +31,9 @@ $(EXEC): digger.cpp
 
 .PHONY: clean val prof todo accents archive backup help
 
+go: $(EXEC)
+	@./$(EXEC)
+
 clean:
 	@$(RM) $(EXEC)
 	
