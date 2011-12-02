@@ -22,15 +22,47 @@ Git repository for Ensimag post-WIMP project.
 
 With glut
 
+TODO: godet, élongation max
+BONUS: multiple views
+
 
 =====
 Input
 =====
 
+Flock of birds
+==============
+
+Intérêt : pouvoir sortir de la cabine
+
+
 Data-glove
 ==========
+
 
 Kinnect
 =======
 
 Marqueurs-balles de ping-pong
+
+? résolution des images ?
+? fréquence ?
+
+Calibrage avec feuille contenant marqueurs positionnée à différentes distances
+=> fonction de correspondance à associer à interpolation
+-> automatisable en une prise
+
+
+Joystick
+========
+
+
+
+==================
+Traitement d'image
+==================
+
+Recherche intelligente :
+- tenir compte de dernière position
+- parcours du tableau avec pas = taille min image
+SDK Microsoft -> squelettes

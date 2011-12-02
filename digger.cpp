@@ -93,7 +93,7 @@ Point O, M(6, 1, 1), V(computeVfromM());
 /*** Model-related functions ***/
 
 // Utility function giving in order solutions of a 2nd degree polynom
-inline void sol2ndDegree(float a, float b, float c, float& sMin, float& sMax) {
+void sol2ndDegree(float a, float b, float c, float& sMin, float& sMax) {
 	bool aIsNull = F_EQUAL(a, 0);
 	float delta = b * b - 4 * a *c;
 	if (delta < 0 || (aIsNull && F_EQUAL(b, 0))) {
@@ -323,24 +323,24 @@ void drawJoint(Point p)
 	glPopMatrix();	
 }
 
-void drawArm(Point p1, Point p2, float height)
+void drawArm(Point p1, Point p2)
 {
 	glColor3f(1.f, 0.5, 0.25);
 	float	vX = p2.x - p1.x,
 			vY = p2.y - p1.y,
 			vZ = p2.z - p1.z,
-			shift = jointRadius / height;
+			flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
+			norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ)),
+			shift = jointRadius / norm;
 	glPushMatrix();
 		glTranslatef(p1.x + vX * shift, p1.y + vY * shift, p1.z + vZ * shift);
 		// We use spherical coordinates
-		float	flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
-				norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ));
 		if (vY >= 0)
 			glRotatef(static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
 		else
 			glRotatef(-static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
 		glRotatef(static_cast<float>(acos(vZ / norm) / M_PI) * 180, 0, 1, 0);
-		glutSolidCylinder(armRadius, height - 2 * jointRadius, 30, 8);
+		glutSolidCylinder(armRadius, norm - 2 * jointRadius, 30, 8);
 	glPopMatrix();
 }
 
@@ -357,9 +357,9 @@ void renderModels()
 	glEnable(GL_LIGHTING);
 		drawCabin();
 		drawJoint(O);
-		drawArm(O, V, upperArmLength);
+		drawArm(O, V);
 		drawJoint(V);
-		drawArm(V, M, lowerArmLength);
+		drawArm(V, M);
 		drawJoint(M);
 	glDisable(GL_LIGHTING);
 } 
