@@ -4,7 +4,7 @@ namespace Toolbox
 {
 	bool surMarqueur(int redValue, int greenValue, int blueValue, float* couleurMarqueur)
 	{
-		float intervalle = 10;
+		float intervalle = 30;
 		return ( couleurMarqueur[0] - intervalle < (float) redValue && (float) redValue < couleurMarqueur[0] + intervalle
 			&& couleurMarqueur[1] - intervalle < (float) greenValue && (float) greenValue < couleurMarqueur[1] + intervalle
 			&& couleurMarqueur[2] - intervalle < (float) blueValue && (float) blueValue < couleurMarqueur[2] + intervalle );

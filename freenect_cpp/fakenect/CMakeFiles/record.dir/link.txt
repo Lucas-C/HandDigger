@@ -1,0 +1,1 @@
+/usr/bin/gcc  -O2   CMakeFiles/record.dir/record.c.o  -o ../bin/record -rdynamic ../lib/libfreenect.so.0.0.1 -lm -lusb-1.0 -Wl,-rpath,/opt/HandDigger/freenect_cpp/lib: 

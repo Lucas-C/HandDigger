@@ -6,6 +6,9 @@ TEST_FREENECT	:= cppview
 
 SRC_DIR		:= ./
 OBJ_DIR		:= ./
+INC_DIR		:= include/
+FREENECT_DIR:= freenect_cpp/
+FREENECT_SRCS_DIR	:= /opt/libfreenect/
 
 # Basename and content of an archive
 ARCHIVE		:= HandDigger
@@ -25,9 +28,8 @@ DBGFLAGS	:= -O1 -DNDEBUG -Wall -Wextra -pedantic
 endif
 
 LIB_GLUT	:= -lGLU -lGL -lglut
-INC_FREENECT:= -isystem /opt/libfreenect/include
-#-L/opt/freenect_cpp/lib
-LIB_FREENECT:= -lfreenect -lusb-1.0
+INC_FREENECT:= -isystem $(INC_DIR)
+LIB_FREENECT:= -L $(FREENECT_DIR)lib/ -lfreenect -lusb-1.0
 
 CXX			:= g++ -std=c++0x
 CXXFLAGS	:= $(DBGFLAGS)
@@ -43,15 +45,18 @@ $(EXEC): digger.cc
 	@$(CXX) $(LDFLAGS) $< -o $@
 
 $(TEST_FREENECT): cppview.cc $(OBJS)
-	@$(CXX) $(LDFLAGS) $(INC_FREENECT) $(LIB_FREENECT) $< $(OBJS) -o $@
+	@$(CXX) $(LDFLAGS) $(INC_FREENECT) $(LIB_FREENECT) $^ -o $@
 
 .PHONY: clean val prof todo accents archive backup help
+
+dep:
+	@cd $(FREENECT_DIR) && cmake $(FREENECT_SRCS_DIR)
 
 go: $(EXEC)
 	@./$(EXEC)
 
 clean:
-	@$(RM) $(EXEC) $(TEST_FREENECT)
+	@$(RM) *.o $(EXEC) $(TEST_FREENECT)
 	
 # valgrind --leak-check=full --gen-suppressions=all ./main 2>&1 | egrep "^[{}]|^   [^ \t]" > sfml.supr
 # --suppressions=sfml.supp

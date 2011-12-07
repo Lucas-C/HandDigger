@@ -1,0 +1,12 @@
+/opt/HandDigger/freenect_cpp/wrappers/cpp/CMakeFiles/cppview.dir
+/opt/HandDigger/freenect_cpp/fakenect/CMakeFiles/fakenect.dir
+/opt/HandDigger/freenect_cpp/src/CMakeFiles/freenect.dir
+/opt/HandDigger/freenect_cpp/wrappers/c_sync/CMakeFiles/freenect_sync.dir
+/opt/HandDigger/freenect_cpp/wrappers/c_sync/CMakeFiles/freenect_sync_static.dir
+/opt/HandDigger/freenect_cpp/src/CMakeFiles/freenectstatic.dir
+/opt/HandDigger/freenect_cpp/examples/CMakeFiles/glpclview.dir
+/opt/HandDigger/freenect_cpp/examples/CMakeFiles/glview.dir
+/opt/HandDigger/freenect_cpp/examples/CMakeFiles/hiview.dir
+/opt/HandDigger/freenect_cpp/fakenect/CMakeFiles/record.dir
+/opt/HandDigger/freenect_cpp/examples/CMakeFiles/tiltdemo.dir
+/opt/HandDigger/freenect_cpp/CMakeFiles/uninstall.dir

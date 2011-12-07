@@ -19,6 +19,8 @@ class Image
 		void detections_en_cours(std::vector<uint8_t> pVector, float *pColor);
 
 	private:
+		DISALLOW_COPY_AND_ASSIGN(Image);
+ 
 		void detection_left_corner(std::vector<uint8_t> pVector, float *pColor, int pXFound, int pYFound, int pNumCenter);
 
 		void detection_left_border(std::vector<uint8_t> pVector, float *pColor, int pXFound, int pYFound, int pNumCenter);
@@ -26,12 +28,11 @@ class Image
 		void detection_high_border(std::vector<uint8_t> pVector, float *pColor, int pXFound, int pYFound, int pNumCenter);
 
 		void detection_normal(std::vector<uint8_t> pVector, float *pColor, int pXFound, int pYFound, int pNumCenter);
-
-	private:
-		DISALLOW_COPY_AND_ASSIGN(Image);
 	
+	public:
 		int mNbPoints;
-		float **mPositionsCenter;
+		const int mNbPointsMax;
+		int **mPositionsCenter;
 };
 
 
