@@ -2,13 +2,21 @@
 DEBUG		:= 1
 
 EXEC		:= digger
+TEST_FREENECT	:= cppview
+
+SRC_DIR		:= ./
+OBJ_DIR		:= ./
 
 # Basename and content of an archive
-ARCHIVE		:= $(EXEC)
-CONTENU		:= $(SRC_REP) Makefile *.cpp
-BCKUP_REP	:= ../
+ARCHIVE		:= HandDigger
+CONTENU		:= $(SRC_DIR) Makefile *.cpp
+BCKUP_DIR	:= ../
 
 ######################################################
+
+SRCS		:= $(wildcard $(SRC_DIR)*.cpp)
+HDRS		:= $(wildcard $(SRC_DIR)*.hpp) $(wildcard $(SRC_DIR)*.tpp)
+OBJS		:= $(patsubst $(SRC_DIR)%.cpp, $(OBJ_DIR)%.o, $(SRCS))
 
 ifeq (1,$(DEBUG))
 DBGFLAGS	:= -g3 -D_DEBUG -Wall -Wextra -pedantic-errors -Wfloat-equal -Wconversion -Wshadow -Weffc++
@@ -16,18 +24,26 @@ else
 DBGFLAGS	:= -O1 -DNDEBUG -Wall -Wextra -pedantic
 endif
 
-LIB_DYN		:= -lGLU -lGL -lglut
+LIB_GLUT	:= -lGLU -lGL -lglut
+INC_FREENECT:= -isystem /opt/libfreenect/include
+#-L/opt/freenect_cpp/lib
+LIB_FREENECT:= -lfreenect -lusb-1.0
 
-CXX			:= g++
+CXX			:= g++ -std=c++0x
 CXXFLAGS	:= $(DBGFLAGS)
-LDFLAGS		:= $(CXXFLAGS) $(LIB_DYN)
+LDFLAGS		:= $(CXXFLAGS) $(LIB_GLUT)
 
 
 all: $(EXEC)
 
-$(EXEC): digger.cpp
+$(OBJS): $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(SRC_DIR)%.h
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(EXEC): digger.cc
 	@$(CXX) $(LDFLAGS) $< -o $@
 
+$(TEST_FREENECT): cppview.cc $(OBJS)
+	@$(CXX) $(LDFLAGS) $(INC_FREENECT) $(LIB_FREENECT) $< $(OBJS) -o $@
 
 .PHONY: clean val prof todo accents archive backup help
 
@@ -35,7 +51,7 @@ go: $(EXEC)
 	@./$(EXEC)
 
 clean:
-	@$(RM) $(EXEC)
+	@$(RM) $(EXEC) $(TEST_FREENECT)
 	
 # valgrind --leak-check=full --gen-suppressions=all ./main 2>&1 | egrep "^[{}]|^   [^ \t]" > sfml.supr
 # --suppressions=sfml.supp
@@ -50,11 +66,11 @@ prof: $(EXEC)
 
 todo:
 	@echo "#### TODO:"
-	@grep --color=auto -rin --exclude="*.svn*" TODO $(SRC_REP)*
+	@grep --color=auto -rin --exclude="*.svn*" TODO $(SRC_DIR)*
 
 accents:
 	@echo "#### ACCENTS:"
-	@grep --color=auto -rin --exclude="*.svn*" -e "é" -e "è" -e "à" -e "ç" -e "ê" -e "ù" -e "ô" $(SRC_REP)* $(SCRIPTS_REP)*
+	@grep --color=auto -rin --exclude="*.svn*" -e "é" -e "è" -e "à" -e "ç" -e "ê" -e "ù" -e "ô" $(SRC_DIR)* $(SCRIPTS_DIR)*
 
 archive: clean
 	@$(RM) $(ARCHIVE).tgz
@@ -65,7 +81,7 @@ archive: clean
 	@$(RM) -r $(ARCHIVE)	
 
 backup: archive
-	@mv $(ARCHIVE).tgz $(BCKUP_REP)`date +%y-%m-%d`_$(ARCHIVE).tgz
+	@mv $(ARCHIVE).tgz $(BCKUP_DIR)`date +%y-%m-%d`_$(ARCHIVE).tgz
 
 help:
 	@echo "### Makefile targets"
@@ -77,4 +93,4 @@ help:
 	@echo " todo \t\t : list the 'TODO'"
 	@echo " accents \t : list the accents in the source files"
 	@echo " archive \t : create an archive named '$(ARCHIVE).tgz' of the content generated for the project"
-	@echo " backup \t : create an archive and move it to a backup folder ('$(BCKUP_REP)')"
+	@echo " backup \t : create an archive and move it to a backup folder ('$(BCKUP_DIR)')"

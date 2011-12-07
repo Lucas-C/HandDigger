@@ -44,6 +44,11 @@
 #endif
 
 
+// Parameters
+const float crossRadius = 10, crossHalfThickness = 2;
+
+
+
 class Mutex {
 public:
 	Mutex() {
@@ -182,6 +187,27 @@ int got_frames(0),window(0);
 int g_argc;
 char **g_argv;
 
+void DrawCross(float x, float y, bool left = true) {
+	float xOffset = 0;
+	if (!left)
+		xOffset = 640;
+	glColor4f(148.0f, 0.0f, 211.0f, 255.0f);
+	glBegin(GL_QUADS);
+		glVertex3f(xOffset + x - crossRadius, y - crossHalfThickness, 0);
+		glVertex3f(xOffset + x + crossRadius, y - crossHalfThickness, 0);
+		glVertex3f(xOffset + x + crossRadius, y + crossHalfThickness, 0);
+		glVertex3f(xOffset + x - crossRadius, y + crossHalfThickness, 0);
+		glVertex3f(xOffset + x - crossRadius, y - crossHalfThickness, 0);
+	glEnd();
+	glBegin(GL_QUADS);
+		glVertex3f(xOffset + x - crossHalfThickness, y - crossRadius, 0);
+		glVertex3f(xOffset + x + crossHalfThickness, y - crossRadius, 0);
+		glVertex3f(xOffset + x + crossHalfThickness, y + crossRadius, 0);
+		glVertex3f(xOffset + x - crossHalfThickness, y + crossRadius, 0);
+		glVertex3f(xOffset + x - crossHalfThickness, y - crossRadius, 0);
+	glEnd();
+}
+
 void DrawGLScene()
 {
 	static std::vector<uint8_t> depth(640*480*4);
@@ -209,27 +235,29 @@ void DrawGLScene()
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, &depth[0]);
 
 	glBegin(GL_TRIANGLE_FAN);
-	glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
-	glTexCoord2f(0, 0); glVertex3f(0,0,0);
-	glTexCoord2f(1, 0); glVertex3f(640,0,0);
-	glTexCoord2f(1, 1); glVertex3f(640,480,0);
-	glTexCoord2f(0, 1); glVertex3f(0,480,0);
+		glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
+		glTexCoord2f(0, 0); glVertex3f(0,0,0);
+		glTexCoord2f(1, 0); glVertex3f(640,0,0);
+		glTexCoord2f(1, 1); glVertex3f(640,480,0);
+		glTexCoord2f(0, 1); glVertex3f(0,480,0);
 	glEnd();
 
 	glBindTexture(GL_TEXTURE_2D, gl_rgb_tex);
 	if (device->getVideoFormat() == FREENECT_VIDEO_RGB || device->getVideoFormat() == FREENECT_VIDEO_YUV_RGB)
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, &rgb[0]);
 	else
-		glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &rgb[0]);
-
+		glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &rgb[0]);	
+	
 	glBegin(GL_TRIANGLE_FAN);
-	glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
-	glTexCoord2f(0, 0); glVertex3f(640,0,0);
-	glTexCoord2f(1, 0); glVertex3f(1280,0,0);
-	glTexCoord2f(1, 1); glVertex3f(1280,480,0);
-	glTexCoord2f(0, 1); glVertex3f(640,480,0);
+		glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
+		glTexCoord2f(0, 0); glVertex3f(640,0,0);
+		glTexCoord2f(1, 0); glVertex3f(1280,0,0);
+		glTexCoord2f(1, 1); glVertex3f(1280,480,0);
+		glTexCoord2f(0, 1); glVertex3f(640,480,0);
 	glEnd();
 
+	DrawCross(150, 250, false);
+		
 	glutSwapBuffers();
 }
 

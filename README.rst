@@ -52,6 +52,8 @@ Calibrage avec feuille contenant marqueurs positionnée à différentes distance
 => fonction de correspondance à associer à interpolation
 -> automatisable en une prise
 
+NOTE: commande d'execution "sudo LD_LIBRARY_PATH=/opt/freenect_cpp/lib/ ./cppview"
+
 
 Joystick
 ========
