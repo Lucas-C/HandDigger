@@ -68,3 +68,13 @@ Recherche intelligente :
 - tenir compte de dernière position
 - parcours du tableau avec pas = taille min image
 SDK Microsoft -> squelettes
+
+
+
+==================
+Lib OpenNI/NITE
+==================
+http://www.xboxgen.fr/installer-kinect-pc-article-4815-1.html
+-> Agidyne | Skyrim99
+
+Key NITE: 0KOIk2JeIBYClPWVnMoRKn5cdY4=
