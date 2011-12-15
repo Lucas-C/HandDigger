@@ -1,1 +1,12 @@
+cppview
 digger
+*.exe
+
+Debug/
+Release/
+_UpgradeReport_Files/
+
+*.vcxproj.filters
+*.vcxproj.user
+*.sdf
+
