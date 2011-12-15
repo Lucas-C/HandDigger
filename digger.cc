@@ -1,7 +1,7 @@
 /**
 	@file digger.cpp
 	@brief Mechanical digger simulation
-	
+
 We consider four elements :
 - the cabin
 joined at point O with
@@ -26,6 +26,9 @@ TODO: only use double ?
 */
 // Indentation used : 4 spaces
 #include <cmath>
+#ifndef M_PI
+	#define M_PI	3.14159265
+#endif
 #include <iostream>
 #include <stdio.h>
 #include <list>
@@ -48,7 +51,7 @@ const float	jointRadius	= 0.3f,
 /*** Simulation parameters ***/
 
 // Display window parameters
-const int	WINDOW_WIDTH			= 1024, 
+const int	WINDOW_WIDTH			= 1024,
 			WINDOW_HEIGHT			= 768,
 			REFRESH_PERIOD_IN_MS	= 1000 / 60;
 
@@ -119,23 +122,23 @@ Point computeVfromM() {
 (3)		Xy = Yx
 	The last one imply that the whole arm is in a vertical plane.
 	The system as two solutions, we want the one with the biggest z coordinate.
-	
+
 	RESOLUTION: We substitue (1) in (2) and the system become (with no nul M coord)
 (1)		x² + y² + z² = upperArmLength²
 (2)		z = (A - xX - yY) / Z
 			where A = (X² + Y² + Z² + upperArmLength² - lowerArmLength²) / 2
 (3)		y = Y/X * x
-	
+
 	We then obtains the following 2nd degree equation in x :
 		x² + Y²/X² * x² + (A - xX - Y²/X * x)² / Z² = upperArmLength²
 	=>	(1 + Y²/X² + (X + Y²/X)²/Z²) * x² - 2A(X + Y²/X)/Z² * x + A²/Z² - upperArmLength² = 0
-	
+
 	If (x == 0)
 (1)		y² + z² = upperArmLength²
 (2)		y = (A - zZ) / Y
 	=> (1 + Z²/Y²) * z² - 2AZ/Y² * z + A² / Y² - upperArmLength² = 0
-		
-*/	
+
+*/
 	float	X2 = M.x * M.x,
 			Y2 = M.y * M.y;
 
@@ -162,7 +165,7 @@ Point computeVfromM() {
 					-2 * A * (M.x + Y2 / M.x) / Z2,
 					A * A / Z2 - upperArmLength * upperArmLength,
 					x1, x2);
-	
+
 	float	z1 = (A - x1 * M.x - x1 * Y2 / M.x) / M.z,
 			z2 = (A - x2 * M.x - x2 * Y2 / M.x) / M.z;
 
@@ -200,18 +203,18 @@ void testComputation() {
 /*** OpenGL-related functions ***/
 
 void setOrthoForFont()
-{	
+{
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
 	gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
 	glScalef(1, -1, 1);
 	glTranslatef(0, -WINDOW_HEIGHT, 0);
-	glMatrixMode(GL_MODELVIEW);	
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
-void resetPerspectiveProjection() 
+void resetPerspectiveProjection()
 {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
@@ -219,11 +222,11 @@ void resetPerspectiveProjection()
 }
 
 void renderSpacedBitmapString(
-							  int x, 
+							  int x,
 							  int y,
-							  int spacing, 
+							  int spacing,
 							  void *font,
-							  char *string) 
+							  char *string)
 {
 	char *c;
 	int x1=x;
@@ -247,13 +250,13 @@ void drawVec(double x, double y, double z)
 		glRotated(180 + phi,0,1,0);
 		glRotated(90 + theta,1,0,0);
 		glPushMatrix();
-			glutSolidCone(0.0325, norm, 4, 1);			
+			glutSolidCone(0.0325, norm, 4, 1);
 		glPopMatrix();
 	glPopMatrix();
 }
 
 void drawAxes()
-{	 
+{
 	//To prevent the view from disturbed on repaint
 	//this push matrix call stores the current matrix state
 	//and restores it once we are done with the arrow rendering
@@ -262,33 +265,33 @@ void drawAxes()
 		glPushMatrix();
 			glTranslatef(0,0, 0.8f);
 			glutSolidCone(0.0325,0.2, 4,1);
-			//Draw label			
+			//Draw label
 			glTranslatef(0,0.0625,0.225f);
 			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Z");
-		glPopMatrix();					
+		glPopMatrix();
 		glutSolidCone(0.0225,1, 4,1);
 
 		glColor3f(1,0,0);
-		glRotatef(90,0,1,0);	
+		glRotatef(90,0,1,0);
 		glPushMatrix();
 			glTranslatef(0,0,0.8f);
 			glutSolidCone(0.0325,0.2, 4,1);
 			//Draw label
 			glTranslatef(0,0.0625,0.225f);
 			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"X");
-		glPopMatrix();					
+		glPopMatrix();
 		glutSolidCone(0.0225,1, 4,1);
 
 		glColor3f(0,1,0);
-		glRotatef(90,-1,0,0);	
+		glRotatef(90,-1,0,0);
 		glPushMatrix();
 			glTranslatef(0,0, 0.8f);
 			glutSolidCone(0.0325,0.2, 4,1);
 			//Draw label
 			glTranslatef(0,0.0625,0.225f);
 			renderSpacedBitmapString(0,0,0,GLUT_BITMAP_HELVETICA_10, (char*)"Y");
-		glPopMatrix();					
-		glutSolidCone(0.0225,1, 4,1);	
+		glPopMatrix();
+		glutSolidCone(0.0225,1, 4,1);
 	glPopMatrix();
 }
 
@@ -311,7 +314,7 @@ void drawCabin() {
 	glPushMatrix();
 		glTranslatef(-jointRadius - cabinSize / 2, 0, 0);
 		glutSolidCube(cabinSize);
-	glPopMatrix();	
+	glPopMatrix();
 }
 
 void drawJoint(Point p)
@@ -320,7 +323,7 @@ void drawJoint(Point p)
 	glPushMatrix();
 		glTranslatef(p.x, p.y, p.z);
 		glutWireSphere(jointRadius, 8, 8);
-	glPopMatrix();	
+	glPopMatrix();
 }
 
 void drawArm(Point p1, Point p2)
@@ -353,7 +356,7 @@ void renderModels()
 // 	TRACE("M = " << M);
 // 	TRACE("V = " << V);
 // 	testComputation();
-	
+
 	glEnable(GL_LIGHTING);
 		drawCabin();
 		drawJoint(O);
@@ -362,7 +365,7 @@ void renderModels()
 		drawArm(V, M);
 		drawJoint(M);
 	glDisable(GL_LIGHTING);
-} 
+}
 
 void initGL() {
 	glEnable(GL_DEPTH_TEST);
@@ -388,20 +391,20 @@ void onReshape(int nw, int nh) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-#define MAX_PATH 127
-char buffer[MAX_PATH];
+#define HUD_BUFFER_SIZE 127
+char buffer[HUD_BUFFER_SIZE];
 void onRender() {
 	//Calculate fps
 	totalFrames++;
 	int current = glutGet(GLUT_ELAPSED_TIME);
-	if((current - startTime) > 1000) {		
+	if((current - startTime) > 1000) {
 		float elapsedTime = float(current-startTime);
 		fps = ((float)(totalFrames * 1000) / elapsedTime) ;
 		startTime = current;
 		totalFrames=0;
 	}
 
-	snprintf(buffer, MAX_PATH, "FPS: %3.2f", fps);
+	snprintf(buffer, HUD_BUFFER_SIZE, "FPS: %3.2f", fps);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -423,9 +426,9 @@ void onRender() {
 
 void mouseCallback(int button, int s, int x, int y)
 {
-	oldX = x; 
-	oldY = y; 
-	
+	oldX = x;
+	oldY = y;
+
 	(void)s;
 	if(button == GLUT_MIDDLE_BUTTON)
 		zoomMode = true;
@@ -438,8 +441,8 @@ void motionCallback(int x, int y)
 	if (zoomMode) {
 		dist *= (1 + (float)(y - oldY) / 60);
 	} else {
-		rX += (float)(x - oldX) / 5; 
-		rY += (float)(y - oldY) / 5; 
+		rX += (float)(x - oldX) / 5;
+		rY += (float)(y - oldY) / 5;
 // 		float theta = 45 - rY / 180 * M_PI;
 // 		float phi = -rX / 180 * M_PI;
 // 		std::cout << "phi: " << phi << " | theta: " << theta << "\n";
@@ -500,7 +503,7 @@ int main(int argc, char** argv) {
 
 	TRACE("Use the mouse to rotate the camera or zoom with the middle button pressed.");
 	TRACE("Move the digger hand with arrow and page up/down keys.");
-	
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);

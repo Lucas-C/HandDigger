@@ -27,6 +27,7 @@ else
 DBGFLAGS	:= -O1 -DNDEBUG -Wall -Wextra -pedantic
 endif
 
+# LIB_GLUT	:= -lglu32 -lopengl32 -lglut32 -L .
 LIB_GLUT	:= -lGLU -lGL -lglut
 INC_FREENECT:= -isystem $(INC_DIR)
 LIB_FREENECT:= -L $(FREENECT_DIR)lib/ -lfreenect -lusb-1.0
@@ -50,14 +51,14 @@ $(TEST_FREENECT): cppview.cc $(OBJS)
 .PHONY: clean val prof todo accents archive backup help
 
 dep:
-	@cd $(FREENECT_DIR) && cmake $(FREENECT_SRCS_DIR)
+	@cd $(FREENECT_DIR) && cmake $(FREENECT_SRCS_DIR) && make
 
 go: $(EXEC)
 	@./$(EXEC)
 
 clean:
 	@$(RM) *.o $(EXEC) $(TEST_FREENECT)
-	
+
 # valgrind --leak-check=full --gen-suppressions=all ./main 2>&1 | egrep "^[{}]|^   [^ \t]" > sfml.supr
 # --suppressions=sfml.supp
 val: $(TESTS)
@@ -83,7 +84,7 @@ archive: clean
 	@cp -rt $(ARCHIVE) $(CONTENU)
 	@$(RM) -r `find $(ARCHIVE) -name .svn`
 	@tar -czf $(ARCHIVE).tgz $(ARCHIVE)
-	@$(RM) -r $(ARCHIVE)	
+	@$(RM) -r $(ARCHIVE)
 
 backup: archive
 	@mv $(ARCHIVE).tgz $(BCKUP_DIR)`date +%y-%m-%d`_$(ARCHIVE).tgz

@@ -17,7 +17,7 @@
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
-  
+
 
 /*!
 	@def FOREACH_IT(stl_iterator, container, var)
@@ -85,7 +85,9 @@ WINDOWS colors "0x??" :
 	#define END		"\033[0m"
 	#define COLOR_STRM_STRING(strm, color, string)	strm << color << string << END
 #elif defined(WIN32)
-	#define WIN32_LEAN_AND_MEAN
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
+	#endif
 	#include <windows.h>
 	static HANDLE hstdout = GetStdHandle( STD_OUTPUT_HANDLE );
 	#define RED		0x0C
