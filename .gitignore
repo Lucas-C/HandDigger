@@ -5,6 +5,7 @@ digger
 Debug/
 Release/
 _UpgradeReport_Files/
+ipch/
 
 *.vcxproj.filters
 *.vcxproj.user

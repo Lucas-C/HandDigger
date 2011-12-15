@@ -38,7 +38,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../Bin/$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bin/$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
@@ -68,7 +68,7 @@
       <AdditionalDependencies>openNI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../Lib/$(Configuration);../../Lib/;../../Samples/NiViewer/Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>../Bin/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>Bin/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -100,7 +100,7 @@
       <AdditionalDependencies>openNI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OPEN_NI_LIB)/$(Configuration);$(OPEN_NI_LIB);./Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>../Bin/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>Bin/$(Configuration)/$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -112,6 +112,7 @@
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Capture.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Digger.cpp" />
     <ClCompile Include="Draw.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalOptions)</AdditionalOptions>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
@@ -127,8 +128,10 @@
     <ClInclude Include="Audio.h" />
     <ClInclude Include="Capture.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="Digger.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Macros.hpp" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="Statistics.h" />

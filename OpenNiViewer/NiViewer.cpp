@@ -1,3 +1,6 @@
+#define HAND_DIGGER
+#ifndef HAND_DIGGER
+
 /*****************************************************************************
 *                                                                            *
 *  OpenNI 1.0 Alpha                                                          *
@@ -565,8 +568,21 @@ int changeDirectory(char* arg0)
 	return 0;
 }
 
+#else // HAND_DIGGER
+
+#include "Digger.h"
+
+#endif HAND_DIGGER
+
 int main(int argc, char **argv)
 {
+#ifdef HAND_DIGGER
+
+	digger(argc, argv); // WILL NEVER RETURN
+	return 0;
+
+#else // HAND_DIGGER
+
 //	try
 	{
 		if (argc == 2)
@@ -684,4 +700,5 @@ int main(int argc, char **argv)
 	closeSample(ERR_OK);
 
 	return (ERR_OK);
+#endif // HAND_DIGGER
 }
