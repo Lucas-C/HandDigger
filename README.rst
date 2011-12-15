@@ -70,4 +70,13 @@ Recherche intelligente :
 SDK Microsoft -> squelettes
 
 
+==================
+Lib OpenNI/NITE
+==================
+http://www.xboxgen.fr/installer-kinect-pc-article-4815-1.html
+-> Agidyne | Skyrim99
+
+Key NITE: 0KOIk2JeIBYClPWVnMoRKn5cdY4=
+
+
 http://tirokartblog.wordpress.com/2011/01/21/kinect-working-on-ubuntu-10-10/
