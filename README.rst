@@ -68,3 +68,6 @@ Recherche intelligente :
 - tenir compte de dernière position
 - parcours du tableau avec pas = taille min image
 SDK Microsoft -> squelettes
+
+
+http://tirokartblog.wordpress.com/2011/01/21/kinect-working-on-ubuntu-10-10/
