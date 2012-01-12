@@ -1,6 +1,3 @@
-//#define HAND_DIGGER
-#ifndef HAND_DIGGER
-
 /*****************************************************************************
 *                                                                            *
 *  OpenNI 1.0 Alpha                                                          *
@@ -304,6 +301,7 @@ void createKeyboardMap()
 			registerKey('0', getPresetName(10), setPreset, 10);
 			registerKey('-', getPresetName(11), setPreset, 11);
 			registerKey('=', getPresetName(12), setPreset, 12);
+			registerKey('h', getPresetName(13), setPreset, 13);	// @@@dded
 		}
 		endKeyboardGroup();
 		startKeyboardGroup(KEYBOARD_GROUP_DEVICE);
@@ -368,6 +366,7 @@ void createMenu()
 			{
 				createMenuEntry("Side by Side", setScreenLayout, (int)SIDE_BY_SIDE);
 				createMenuEntry("Overlay", setScreenLayout, (int)OVERLAY);
+				createMenuEntry("Four Pannels", setScreenLayout, (int)FOUR_PANNELS);	// @@@dded
 			}
 			endSubMenu();
 			startSubMenu("Depth");
@@ -568,21 +567,8 @@ int changeDirectory(char* arg0)
 	return 0;
 }
 
-#else // HAND_DIGGER
-
-#include "Digger.h"
-
-#endif HAND_DIGGER
-
 int main(int argc, char **argv)
 {
-#ifdef HAND_DIGGER
-
-	digger(argc, argv); // WILL NEVER RETURN
-	return 0;
-
-#else // HAND_DIGGER
-
 //	try
 	{
 		if (argc == 2)
@@ -614,8 +600,9 @@ int main(int argc, char **argv)
 			XnChar strError[1024];
 			errors.ToString(strError, 1024);
 			printf("%s\n", strError);
+			// TODO: make so simulation works without Kinnect
 			closeSample(ERR_DEVICE);
-			return (rc);
+			return (rc); // NEVER REACHED
 		}
 		else if (rc != XN_STATUS_OK)
 		{
@@ -628,8 +615,8 @@ int main(int argc, char **argv)
 		printf ("Unknown error!\n");
 		closeSample(ERR_DEVICE);
 	}
-
 	audioInit();
+
 	captureInit(SAMPLE_XML_PATH);
 	statisticsInit();
 
@@ -647,7 +634,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayString("stencil double rgb");
 	glutInitWindowSize(WIN_SIZE_X, WIN_SIZE_Y);
-	glutCreateWindow("OpenNI Viewer");
+	glutCreateWindow("DiggerHand prototype");
 	glutFullScreen();
 	glutSetCursor(GLUT_CURSOR_NONE);
 
@@ -700,5 +687,4 @@ int main(int argc, char **argv)
 	closeSample(ERR_OK);
 
 	return (ERR_OK);
-#endif // HAND_DIGGER
 }

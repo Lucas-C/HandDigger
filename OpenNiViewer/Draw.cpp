@@ -26,6 +26,9 @@
 // --------------------------------
 // Includes
 // --------------------------------
+#include <iostream>	//	@@@dded
+#include "Digger.h"	//	@@@dded
+
 #include "Draw.h"
 #include "Device.h"
 #include "Keyboard.h"
@@ -76,6 +79,7 @@ typedef struct
 	const XnChar* strErrorState;
 	UIntRect DepthLocation;
 	UIntRect ImageLocation;
+	UIntRect Model3DLocation;	// @@@dded
 } DrawConfig;
 
 typedef struct
@@ -138,6 +142,7 @@ DrawConfigPreset g_Presets[PRESET_COUNT] =
 	{ "Rainbow Depth on Image",				{ false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Cyclic Rainbow Depth on Image",		{ false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Image Only",							{ false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Hand Digger !",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			FOUR_PANNELS } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -498,6 +503,8 @@ void drawSelectionChanged(SelectionState state, UIntRect selection)
 		{
 			drawCropStream(getIRGenerator(), g_DrawConfig.ImageLocation, selection, 4);
 		}
+
+		// TODO: idem for Model3DLocation ?
 	}
 }
 
@@ -527,7 +534,8 @@ void drawInit()
 	TextureMapInit(&g_texBackground, 1024, 1024, 3, 1024, 1024);
 
 	// load background image
-	xnOSLoadFile("..\\..\\..\\Data\\RGBViewer\\back.raw", TextureMapGetLine(&g_texBackground, 0), 1024*1024*3);
+	if (XN_STATUS_OK != xnOSLoadFile(BACKGROUND_IMG_NAME, TextureMapGetLine(&g_texBackground, 0), 1024*1024*3))
+		std::cerr << "!! Failed to load background image " << BACKGROUND_IMG_NAME << "\n";	//	@@@dded
 
 	TextureMapUpdate(&g_texBackground);
 
@@ -1018,6 +1026,21 @@ void drawDepth(UIntRect* pLocation, UIntPair* pPointer)
 	}
 }
 
+void drawModel3D(UIntRect* pLocation)	// @@@dded
+{
+	if (true)// TODO: g_DrawConfig.Streams.Model3D.Coloring == MODEL3D_OFF)
+	{
+		return;
+	}
+
+	// If problem loading (!isModel3DOn()) : drawClosedStream(pLocation, "Model3D");
+
+	if (g_DrawConfig.Streams.bBackground)
+		TextureMapDraw(&g_texBackground, pLocation);
+	
+	Digger::draw();
+}
+
 void drawPointerMode(UIntPair* pPointer)
 {
 	char buf[512] = "";
@@ -1495,12 +1518,25 @@ void drawFrame()
 	g_DrawConfig.ImageLocation.uLeft = 0;
 	g_DrawConfig.ImageLocation.uRight = WIN_SIZE_X - 1;
 
-	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
+	// @@@dded 4 lines
+	g_DrawConfig.Model3DLocation.uBottom = 0;
+	g_DrawConfig.Model3DLocation.uTop = WIN_SIZE_Y - 1;
+	g_DrawConfig.Model3DLocation.uLeft = 0;
+	g_DrawConfig.Model3DLocation.uRight = WIN_SIZE_X - 1;
+
+	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE
+	||	g_DrawConfig.Streams.ScreenArrangement == FOUR_PANNELS)
 	{
 		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
 		g_DrawConfig.ImageLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.ImageLocation.uLeft = WIN_SIZE_X / 2;
+	}
+	
+	if (g_DrawConfig.Streams.ScreenArrangement == FOUR_PANNELS)	// @@@dded bloc
+	{
+		g_DrawConfig.Model3DLocation.uBottom = WIN_SIZE_Y / 2;
+		g_DrawConfig.Model3DLocation.uRight = WIN_SIZE_X / 2 - 1;
 	}
 
 	// Texture map init
@@ -1512,7 +1548,6 @@ void drawFrame()
 	}
 
 	const MapMetaData* pImageMD = NULL;
-
 	if (isImageOn())
 	{
 		pImageMD = getImageMetaData();
@@ -1527,6 +1562,7 @@ void drawFrame()
 		TextureMapInit(&g_texImage, pImageMD->FullXRes(), pImageMD->FullYRes(), 4, pImageMD->XRes(), pImageMD->YRes());
 		fixLocation(&g_DrawConfig.ImageLocation, pImageMD->FullXRes(), pImageMD->FullYRes());
 	}
+	// TODO: handle the same for Model3D ?
 
 	// check if pointer is over a map
 	bool bOverDepth = (pDepthMD != NULL) && isPointInRect(g_DrawUserInput.Cursor, &g_DrawConfig.DepthLocation);
@@ -1562,6 +1598,8 @@ void drawFrame()
 	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
 
 	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+
+	drawModel3D(&g_DrawConfig.Model3DLocation);
 
 	printStatisticsInfo();
 	printRecordingInfo();

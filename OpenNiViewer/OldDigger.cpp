@@ -38,8 +38,8 @@ TODO: only use double ?
 #endif
 
 //#include <GL/freeglut.h>
-// #include <glh/glh_obs.h>
-// #include <glh/glh_glut2.h>
+#include <glh/glh_obs.h>
+#include <glh/glh_glut2.h>
 # define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
 
 #include "Macros.hpp"
@@ -373,11 +373,6 @@ void renderModels()
 		drawArm(V, M);
 		drawJoint(M);
 	glDisable(GL_LIGHTING);
-}
-
-void draw()
-{
-	renderModels();
 }
 
 void initGL() {
