@@ -4,10 +4,13 @@ digger
 
 Debug/
 Release/
-_UpgradeReport_Files/
 ipch/
 
+*.exe
+*.pdb
+*.ilk
+*.opensdf
+*.sdf
+*.suo
 *.vcxproj.filters
 *.vcxproj.user
-*.sdf
-

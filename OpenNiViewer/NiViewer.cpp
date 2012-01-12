@@ -1,4 +1,4 @@
-#define HAND_DIGGER
+//#define HAND_DIGGER
 #ifndef HAND_DIGGER
 
 /*****************************************************************************

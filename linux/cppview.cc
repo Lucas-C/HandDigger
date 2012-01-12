@@ -256,8 +256,8 @@ void DrawGLScene()
 	if (device->getVideoFormat() == FREENECT_VIDEO_RGB || device->getVideoFormat() == FREENECT_VIDEO_YUV_RGB)
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, &rgb[0]);
 	else
-		glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &rgb[0]);	
-	
+		glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, &rgb[0]);
+
 	glBegin(GL_TRIANGLE_FAN);
 		glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
 		glTexCoord2f(0, 0); glVertex3f(640,0,0);
@@ -271,10 +271,10 @@ void DrawGLScene()
 	float color[] = {255, 0, 0};
 	img.premiere_detection(rgb, color);
 	if (img.mNbPoints == 1)
-		DrawCross(	static_cast<float>(img.mPositionsCenter[0][0]), 
+		DrawCross(	static_cast<float>(img.mPositionsCenter[0][0]),
 					static_cast<float>(img.mPositionsCenter[0][1]),
 					false);
-		
+
 	glutSwapBuffers();
 }
 
