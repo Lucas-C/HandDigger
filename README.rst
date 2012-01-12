@@ -2,13 +2,8 @@
 
 .. _contact: lucas.cimon__AT__ensimag.fr
 
-======
-README
-======
-
 Repo GIT pour le projet Ensimag post-WIMP "contrôle intuituif de pelle mécanique".
 
-.. contents::
 .. sectnum::
 
 
@@ -64,7 +59,9 @@ Traitement d'image
 ==================
 
 Recherche intelligente :
+
 - tenir compte de dernière position
+
 - parcours du tableau avec pas = taille min image
 
 

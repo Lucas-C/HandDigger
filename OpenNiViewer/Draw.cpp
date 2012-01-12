@@ -1006,7 +1006,7 @@ void drawDepth(UIntRect* pLocation, UIntPair* pPointer)
 						pTexture[3] = nAlpha;
 				}
 			}
-		} // not STANDRARD_DEVIATION
+		} // not STANDARD_DEVIATION
 
 		if (pPointer != NULL)
 		{
