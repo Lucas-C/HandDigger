@@ -5,9 +5,17 @@ using namespace std;
 
 namespace Toolbox
 {
-	bool surMarqueur(int redValue, int greenValue, int blueValue, float* couleurMarqueur, bool yuv)
+	bool surMarqueur(int redValue, int greenValue, int blueValue, MarqueurId marqId, bool yuv)
 	{
-		if (!yuv) {
+		// Pour l'instant, requiert que les valeurs rgb entrées soient celles de la représentation RGB
+		if (marqId == ORANGE) {
+			return (redValue == 0 && greenValue > 150 && blueValue > 150);
+		} else {
+			cout << "surMarqueur : couleur de marqueur non implementee" << endl;
+			system("pause");
+		}
+
+		return false;
 
 			// DETECTION RGB
 			/*float intervalle = 20;
@@ -16,55 +24,7 @@ namespace Toolbox
 				&& couleurMarqueur[2] - intervalle < (float) blueValue && (float) blueValue < couleurMarqueur[2] + intervalle );*/
 
 
-			// DETECTION TEINTE
-			/*float intervalle = 20.0;
-
-			// Calcul teinte désirée
-			int M_des = max(couleurMarqueur[0], max(couleurMarqueur[1], couleurMarqueur[2]));
-			int m_des = min(couleurMarqueur[0], min(couleurMarqueur[1], couleurMarqueur[2]));
-			int C_des = M_des - m_des;
-			if (C_des == 0) {
-				// teinte non définie
-				return false;
-			}
-			double teinte_des;
-			if (M_des == couleurMarqueur[0]) {
-				teinte_des = (((double) (couleurMarqueur[1] - couleurMarqueur[2])) / ((double) C_des));
-				if (teinte_des < 0) {
-					teinte_des += 6.0;
-				}
-			} else if (M_des == couleurMarqueur[1]) {
-				teinte_des = (((double) (couleurMarqueur[2] - couleurMarqueur[0])) / ((double) C_des)) + 2.0;
-			} else {
-				teinte_des = (((double) (couleurMarqueur[0] - couleurMarqueur[1])) / ((double) C_des)) + 4.0;
-			}
-
-			teinte_des *= 60.0;
-
-			// Calcul teinte pixel
-			int M = max(redValue, max(greenValue, blueValue));
-			int m = min(redValue, min(greenValue, blueValue));
-			int C = M - m;
-			if (C < 100) {
-				// teinte non définie
-				return false;
-			}
-			double teinte;
-			if (M == redValue) {
-				teinte = ((greenValue - blueValue) / C) % 6;
-			} else if (M == greenValue) {
-				teinte = (((double) (blueValue - redValue)) / ((double) C)) + 2.0;
-			} else {
-				teinte = (((double) (redValue - greenValue)) / ((double) C)) + 4.0;
-			}
-
-			teinte *= 60;
-
-			if (teinte < 0 || teinte > 360) {
-				return false;
-			}
-
-			return (teinte_des - intervalle < teinte && teinte < teinte_des + intervalle); */
+			/*
 
 
 			// DETECTION HSV (en supposant que couleurMarqueur est en HSV
@@ -119,6 +79,7 @@ namespace Toolbox
 
 			return ( u_des - intervalle_u < u_value && u_value < u_des + intervalle_u && v_des - intervalle_v < v_value && v_value < v_des + intervalle_v );
 		}
+		*/
 	}
 
 	void creerPpm(const char *sortie, unsigned char * image)
@@ -213,8 +174,33 @@ namespace Toolbox
 				}
 
 				// Calcul valeur pixel
-				double valeur = (double) M;
+				int valeur = M;
+
+
+				// Conversion des valeurs HSV dans l'intervalle [0, 255]
+				teinte *= 255.0/360.0;
+				saturation *= 255.0;
+
+				int teinteInt = (int) teinte;
+				int saturationInt = (int) saturation;
+
+				if (teinteInt < 0) {
+					teinteInt = 0;
+				} else if (teinteInt > 255) {
+					teinteInt = 255;
+				}
+
+				if (saturationInt < 0) {
+					saturationInt = 0;
+				} else if (saturationInt > 255) {
+					saturationInt = 255;
+				}
 				
+				// Écriture des valeurs dans les composantes RGB
+				image[indiceR] = (unsigned char) teinteInt;
+				image[indiceV] = (unsigned char) saturationInt;
+				image[indiceB] = (unsigned char) valeur;
+			
 			}
 		}
 	}

@@ -427,18 +427,33 @@ void CSkeletalViewerApp::Nui_GotVideoAlert( )
         BYTE * pBuffer = (BYTE*) LockedRect.pBits;
 
 		// pBuffer est un BYTE* de taille 640*480*4
-		// Attention : l'ordre est BGRA ! 
+		// Attention : l'ordre est BGRA !
+
+		// Création d'une copie de pBuffer en HSV
+		BYTE * pBufferCopie = new BYTE[640*480*4];
+		for (int i = 0; i < 640*480*4; i++) {
+			pBufferCopie[i] = pBuffer[i];
+		}
+		rgbToHsv(pBufferCopie);
 
 		// DEFINIR LA COULEUR DU MARQUEUR RECHERCHE (en RGB)
-		float* couleurMarqueur = new float[3];
+		/*float* couleurMarqueur = new float[3];
 		couleurMarqueur[0] = 0;
 		couleurMarqueur[1] = 0;
-		couleurMarqueur[2] = 255;
+		couleurMarqueur[2] = 255;*/
 
-		// CREATION DE L'OBJET IMAGE ET DETECTION DU MARQUEUR
+		// CREATION DE L'OBJET IMAGE ET DETECTION DU MARQUEUR (sur la copie en HSV)
 		Image imageCamera(1);
-		imageCamera.premiere_detection(pBuffer, couleurMarqueur);
+		std::vector<MarqueurId> marqueurs;
+		marqueurs.push_back(ORANGE);
+		imageCamera.premiere_detection(pBufferCopie, marqueurs);
+
+		// LIBERATION MEMOIRE
+
+		
+		// Affichage du centre du marqueur
 		imageCamera.placerMarqueurs(pBuffer);
+
 		//info = imageCamera.mPositionsCenter[0][0];
 
 		// CONSTRUCTION D'UN FICHIER IMAGE

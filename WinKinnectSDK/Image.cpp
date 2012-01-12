@@ -25,7 +25,7 @@ Image::~Image()
 	delete mPositionsCenter;
 }
 
-void Image::premiere_detection(unsigned char * pVector, float *pColor)
+void Image::premiere_detection(unsigned char * pVector, std::vector<MarqueurId> marqueurs)
 {
 	int lWidth =  640;
 	int lHeight = 480;
@@ -43,7 +43,7 @@ void Image::premiere_detection(unsigned char * pVector, float *pColor)
 			int redComp = pVector[lNbComp * (i*lWidth + j) + 2];
 
 			// Le pixel correspond-il à un marqueur ?
-			if (surMarqueur(redComp, greenComp, blueComp, pColor, false))
+			if (surMarqueur(redComp, greenComp, blueComp, ORANGE, false))
 			{
 				// Calcul du diamètre du marqueur
 				int hauteur = 1;
@@ -51,7 +51,7 @@ void Image::premiere_detection(unsigned char * pVector, float *pColor)
 				redComp = pVector[lNbComp * (indiceParcours*lWidth + j)];
 				greenComp = pVector[lNbComp * (indiceParcours*lWidth + j) + 1];
 				blueComp = pVector[lNbComp * (indiceParcours*lWidth + j) + 2];
-				while (surMarqueur(redComp, greenComp, blueComp, pColor, false))
+				while (surMarqueur(redComp, greenComp, blueComp, ORANGE, false))
 				{
 					hauteur++;
 					indiceParcours++;
