@@ -128,21 +128,21 @@ float g_fMaxDepth;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
-	// NAME,								BACKGRD, { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
-	{ "Standard Deviation",					{ false, { STANDARD_DEVIATION,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Depth Histogram",					{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Psychedelic Depth [Centimeters]",	{ false, { PSYCHEDELIC,			1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Psychedelic Depth [Millimeters]",	{ false, { PSYCHEDELIC_SHADES,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Rainbow Depth",						{ false, { CYCLIC_RAINBOW,		1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Depth masked Image",					{ false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
-	{ "Background Removal",					{ true,	 { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
-	{ "Side by Side",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			SIDE_BY_SIDE } },
-	{ "Depth on Image",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Transparent Depth on Image",			{ false, { LINEAR_HISTOGRAM,  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Rainbow Depth on Image",				{ false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Cyclic Rainbow Depth on Image",		{ false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Image Only",							{ false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Hand Digger !",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			FOUR_PANNELS } },	//	@@@dded
+	// NAME,								BACKGRD,        { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
+	{ "Standard Deviation",					{ false, false, { STANDARD_DEVIATION,	1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Depth Histogram",					{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_OFF },				OVERLAY } },
+	{ "Psychedelic Depth [Centimeters]",	{ false, false, { PSYCHEDELIC,			1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Psychedelic Depth [Millimeters]",	{ false, false, { PSYCHEDELIC_SHADES,	1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Rainbow Depth",						{ false, false, { CYCLIC_RAINBOW,		1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Depth masked Image",					{ false, false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
+	{ "Background Removal",					{ true,	 false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
+	{ "Side by Side",						{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			SIDE_BY_SIDE } },
+	{ "Depth on Image",						{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			OVERLAY } },
+	{ "Transparent Depth on Image",			{ false, false, { LINEAR_HISTOGRAM,  0.6 },  { IMAGE_NORMAL },			OVERLAY } },
+	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Hand Digger !",						{ false, true,  { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			FOUR_PANNELS } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -529,7 +529,7 @@ void drawInit()
 
 	CreateRainbowPallet();
 
-	setPreset(7);
+	setPreset(13);
 
 	TextureMapInit(&g_texBackground, 1024, 1024, 3, 1024, 1024);
 
@@ -1028,10 +1028,8 @@ void drawDepth(UIntRect* pLocation, UIntPair* pPointer)
 
 void drawModel3D(UIntRect* pLocation)	// @@@dded
 {
-	if (true)// TODO: g_DrawConfig.Streams.Model3D.Coloring == MODEL3D_OFF)
-	{
+	if (!g_DrawConfig.Streams.bModel3D)
 		return;
-	}
 
 	// If problem loading (!isModel3DOn()) : drawClosedStream(pLocation, "Model3D");
 

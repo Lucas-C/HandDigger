@@ -200,6 +200,9 @@ void closeDevice()
 
 void readFrame()
 {
+	if (!g_Depth.IsValid() && !g_Image.IsValid() && !g_IR.IsValid() && !g_Audio.IsValid())	// @@@dded
+		return;
+
 	XnStatus rc = XN_STATUS_OK;
 
 	if (g_pPrimary != NULL)

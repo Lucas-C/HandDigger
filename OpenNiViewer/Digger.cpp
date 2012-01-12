@@ -37,9 +37,7 @@ TODO: only use double ?
 #define snprintf _snprintf_s
 #endif
 
-//#include <GL/freeglut.h>
-// #include <glh/glh_obs.h>
-// #include <glh/glh_glut2.h>
+#include "GL/glut.h"
 # define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
 
 #include "Macros.hpp"
@@ -375,14 +373,17 @@ void renderModels()
 	glDisable(GL_LIGHTING);
 }
 
+namespace Digger
+{
 void draw()
 {
 	renderModels();
 }
+}
 
 void initGL() {
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE); // not movable to NiViewer
 
 	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
 	glEnable(GL_COLOR_MATERIAL);

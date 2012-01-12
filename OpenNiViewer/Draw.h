@@ -88,9 +88,9 @@ typedef struct
 typedef struct
 {
 	bool bBackground;
+	bool bModel3D;
 	DepthDrawConfig Depth;
 	ImageDrawConfig Image;
-	// TODO: add Model3D
 	ScreenArrangementType ScreenArrangement;
 } StreamsDrawConfig;
 

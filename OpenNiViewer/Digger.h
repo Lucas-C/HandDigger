@@ -3,7 +3,7 @@
 
 namespace Digger
 {
-	void draw() {}
+	void draw();
 }
 
 #endif //__DIGGER_H__

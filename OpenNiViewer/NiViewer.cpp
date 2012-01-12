@@ -197,6 +197,7 @@ void init_opengl()
 {
 	glClearStencil(128);
 	glEnable(GL_DEPTH_TEST);
+
 	glDepthFunc(GL_LESS);
 	glEnable(GL_NORMALIZE);
 
@@ -600,7 +601,6 @@ int main(int argc, char **argv)
 			XnChar strError[1024];
 			errors.ToString(strError, 1024);
 			printf("%s\n", strError);
-			// TODO: make so simulation works without Kinnect
 			closeSample(ERR_DEVICE);
 			return (rc); // NEVER REACHED
 		}
