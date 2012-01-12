@@ -9,7 +9,7 @@ class Image
 	
 		~Image();
 
-		void premiere_detection(unsigned char * pVector, float *pColor);
+		void premiere_detection(unsigned char * pVector, std::vector<MarqueurId> marqueurs);
 
 		void placerMarqueurs(unsigned char * image);
 
