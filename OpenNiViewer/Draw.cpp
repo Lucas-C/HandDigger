@@ -79,7 +79,6 @@ typedef struct
 	const XnChar* strErrorState;
 	UIntRect DepthLocation;
 	UIntRect ImageLocation;
-	UIntRect Model3DLocation;	// @@@dded
 } DrawConfig;
 
 typedef struct
@@ -142,7 +141,7 @@ DrawConfigPreset g_Presets[PRESET_COUNT] =
 	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Hand Digger !",						{ false, true,  { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			FOUR_PANNELS } },	//	@@@dded
+	{ "Hand Digger !",						{ false, true,  { DEPTH_OFF			,	1 }, { IMAGE_OFF },				MODEL3D } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -503,8 +502,6 @@ void drawSelectionChanged(SelectionState state, UIntRect selection)
 		{
 			drawCropStream(getIRGenerator(), g_DrawConfig.ImageLocation, selection, 4);
 		}
-
-		// TODO: idem for Model3DLocation ?
 	}
 }
 
@@ -780,7 +777,7 @@ void drawClosedStream(UIntRect* pLocation, const char* csStreamName)
 
 void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 {
-	if (!isImageOn() && !isIROn())
+	if (!isImageOn() && !isIROn() && !g_DrawConfig.Streams.bModel3D) // @@@dded
 	{
 		drawClosedStream(pLocation, "Image");
 		return;
@@ -1024,19 +1021,6 @@ void drawDepth(UIntRect* pLocation, UIntPair* pPointer)
 		TextureMapUpdate(&g_texDepth);
 		TextureMapDraw(&g_texDepth, pLocation);
 	}
-}
-
-void drawModel3D(UIntRect* pLocation)	// @@@dded
-{
-	if (!g_DrawConfig.Streams.bModel3D)
-		return;
-
-	// If problem loading (!isModel3DOn()) : drawClosedStream(pLocation, "Model3D");
-
-	if (g_DrawConfig.Streams.bBackground)
-		TextureMapDraw(&g_texBackground, pLocation);
-	
-	Digger::draw();
 }
 
 void drawPointerMode(UIntPair* pPointer)
@@ -1516,25 +1500,12 @@ void drawFrame()
 	g_DrawConfig.ImageLocation.uLeft = 0;
 	g_DrawConfig.ImageLocation.uRight = WIN_SIZE_X - 1;
 
-	// @@@dded 4 lines
-	g_DrawConfig.Model3DLocation.uBottom = 0;
-	g_DrawConfig.Model3DLocation.uTop = WIN_SIZE_Y - 1;
-	g_DrawConfig.Model3DLocation.uLeft = 0;
-	g_DrawConfig.Model3DLocation.uRight = WIN_SIZE_X - 1;
-
-	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE
-	||	g_DrawConfig.Streams.ScreenArrangement == FOUR_PANNELS)
+	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
 	{
 		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
 		g_DrawConfig.ImageLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.ImageLocation.uLeft = WIN_SIZE_X / 2;
-	}
-	
-	if (g_DrawConfig.Streams.ScreenArrangement == FOUR_PANNELS)	// @@@dded bloc
-	{
-		g_DrawConfig.Model3DLocation.uBottom = WIN_SIZE_Y / 2;
-		g_DrawConfig.Model3DLocation.uRight = WIN_SIZE_X / 2 - 1;
 	}
 
 	// Texture map init
@@ -1583,32 +1554,45 @@ void drawFrame()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	// Setup the opengl env for fixed location view
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
-	glDisable(GL_DEPTH_TEST); 
+	// @@@dded
+	static bool displayingModel3D = false;
+	if (g_DrawConfig.Streams.bModel3D) {
+		if (!displayingModel3D) {
+			Digger::init();
+			displayingModel3D = true;
+		}
+		Digger::draw();
+	} else {
+		if (displayingModel3D) {
+			Digger::finalize();
+			displayingModel3D = false;
+		}
 
-	if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
-		calculateHistogram();
+		// Setup the opengl env for fixed location view
+		glMatrixMode(GL_PROJECTION);
+		// @@@nnoyingly useless glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+		// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
 
-	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
+		if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
+			calculateHistogram();
 
-	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+		drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
 
-	drawModel3D(&g_DrawConfig.Model3DLocation);
+		drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
 
-	printStatisticsInfo();
-	printRecordingInfo();
+		printStatisticsInfo();
+		printRecordingInfo();
 
-	if (g_DrawConfig.bShowPointer)
-		drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
+		if (g_DrawConfig.bShowPointer)
+			drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
 
-	drawUserInput(!bOverDepth && !bOverImage);
+		drawUserInput(!bOverDepth && !bOverImage);
 
-	drawUserMessage();
-	drawPlaybackSpeed();
+		drawUserMessage();
+		drawPlaybackSpeed();
+	}
 
 	if (g_DrawConfig.strErrorState != NULL)
 		drawErrorState();

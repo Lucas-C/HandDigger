@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>NiViewer</ProjectName>
+    <ProjectName>Digger</ProjectName>
     <ProjectGuid>{98122DD2-BFE1-4CA8-0147-E4168A7368C8}</ProjectGuid>
-    <RootNamespace>NiViewer</RootNamespace>
+    <RootNamespace>Digger</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -38,10 +38,13 @@ TODO: only use double ?
 #endif
 
 #include "GL/glut.h"
-# define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
+#define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
 
 #include "Macros.hpp"
 
+
+namespace Digger
+{
 
 /*** Model parameters ***/
 
@@ -64,6 +67,8 @@ const int	WINDOW_WIDTH			= 1024,
 const float	arrowStep = 0.1f;
 
 // Camera parameters
+int		nw			= 0,
+		nh			= 0;
 int		oldX		= 0,
 		oldY		= 0;
 float	rX			= 15,
@@ -373,41 +378,42 @@ void renderModels()
 	glDisable(GL_LIGHTING);
 }
 
-namespace Digger
-{
-void draw()
-{
-	renderModels();
-}
-}
-
-void initGL() {
+void init() {
+	glDisable(GL_NORMALIZE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE); // not movable to NiViewer
 
 	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
 	glEnable(GL_COLOR_MATERIAL);
 
 	glEnable(GL_LIGHTING);
-	float ambientColor[]	= { 0.0f, 0.1f, 0.2f, 0.0f };
-	float diffuseColor[]	= { 1.0f, 1.0f, 1.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientColor);
+	float diffuseColor[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
 	glEnable(GL_LIGHT0);
 	glDisable(GL_LIGHTING);
 }
 
-void onReshape(int nw, int nh) {
-	glViewport(0,0,nw, nh);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
+void finalize() {
+	glClearColor(0, 0, 0, 1);
+	glDisable(GL_COLOR_MATERIAL);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+	glEnable(GL_NORMALIZE);
+	glDisable(GL_DEPTH_TEST);
 }
 
 #define HUD_BUFFER_SIZE 127
 char buffer[HUD_BUFFER_SIZE];
-void onRender() {
+void draw()
+{
+	glViewport(0, 0, nw, nh);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
+	glMatrixMode(GL_MODELVIEW);
+
+	glTranslatef(0,0,dist);
+	glRotatef(rX,0,1,0);
+	glRotatef(rY,1,0,0);
+
 	//Calculate fps
 	totalFrames++;
 	int current = glutGet(GLUT_ELAPSED_TIME);
@@ -417,25 +423,20 @@ void onRender() {
 		startTime = current;
 		totalFrames=0;
 	}
-
 	snprintf(buffer, HUD_BUFFER_SIZE, "FPS: %3.2f", fps);
-
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-	glTranslatef(0,0,dist);
-	glRotatef(rX,0,1,0);
-	glRotatef(rY,1,0,0);
 
 	renderModels();
 
+	//Show the fps
 	setOrthoForFont();
 	glColor3f(1,1,1);
-	//Show the fps
 	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
-
 	resetPerspectiveProjection();
+}
 
-	glutSwapBuffers();
+void reshapeCallback(int nw_, int nh_) {
+	nw = nw_;
+	nh = nh_;
 }
 
 void mouseCallback(int button, int s, int x, int y)
@@ -465,7 +466,7 @@ void motionCallback(int x, int y)
 	oldY = y;
 }
 
-static void keyboardCallback(unsigned char key, int, int)
+void keyboardCallback(unsigned char key, int, int)
 {
 	switch(key)
 	{
@@ -498,42 +499,9 @@ static void keyboardCallback(unsigned char key, int, int)
 	}
 }
 
-static void arrowKeyCallback(int key, int x, int y)
+void arrowKeyCallback(int key, int x, int y)
 {
 	keyboardCallback((unsigned char)key, x, y);
 }
 
-void refreshTimer(int millisec)
-{
-	glutTimerFunc(millisec, refreshTimer, millisec);
-	glutPostRedisplay();
-}
-
-
-/*** Program entry point ***/
-
-int digger(int argc, char** argv) {
-// 	atexit(onShutdown);
-
-	TRACE("Use the mouse to rotate the camera or zoom with the middle button pressed.");
-	TRACE("Move the digger hand with arrow and page up/down keys.");
-
-	// IGNORED glutInit(&argc, argv);
-	// IGNORED glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	// IGNORED glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-	// MIGRATED glutSetWindow(glutCreateWindow("DiggerHand prototype"));
-
-	glutDisplayFunc(onRender);
-	glutTimerFunc(REFRESH_PERIOD_IN_MS, refreshTimer, REFRESH_PERIOD_IN_MS);
-	glutReshapeFunc(onReshape);
-
-	glutKeyboardFunc(keyboardCallback);
-	glutSpecialFunc(arrowKeyCallback);
-
-	glutMouseFunc(mouseCallback);
-	glutMotionFunc(motionCallback);
-
-	initGL();
-
-	return 0;
 }

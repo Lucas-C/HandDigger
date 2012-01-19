@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NiViewer", "NiViewer_2010.vcxproj", "{98122DD2-BFE1-4CA8-0147-E4168A7368C8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Digger", "Digger.vcxproj", "{98122DD2-BFE1-4CA8-0147-E4168A7368C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

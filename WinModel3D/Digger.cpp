@@ -66,6 +66,8 @@ const int	WINDOW_WIDTH			= 1024,
 const float	arrowStep = 0.1f;
 
 // Camera parameters
+int		nw			= 0,
+		nh			= 0;
 int		oldX		= 0,
 		oldY		= 0;
 float	rX			= 15,
@@ -375,28 +377,16 @@ void renderModels()
 	glDisable(GL_LIGHTING);
 }
 
-void initGL() {
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glEnable(GL_LIGHTING);
-	float ambientColor[]	= { 0.0f, 0.1f, 0.2f, 0.0f };
-	float diffuseColor[]	= { 1.0f, 1.0f, 1.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientColor);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
-	glEnable(GL_LIGHT0);
-	glDisable(GL_LIGHTING);
-}
-
-void onReshape(int nw, int nh) {
-	glViewport(0,0,nw, nh);
-	glMatrixMode(GL_PROJECTION);
+void onReshape(int nw_, int nh_) {
+	nw = nw_;
+	nh = nh_;
+/*
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
+	glTranslatef(0,0,dist);
+	glRotatef(rX,0,1,0);
+	glRotatef(rY,1,0,0);
+*/
 }
 
 #define HUD_BUFFER_SIZE 127
@@ -414,8 +404,16 @@ void onRender() {
 
 	snprintf(buffer, HUD_BUFFER_SIZE, "FPS: %3.2f", fps);
 
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	resetPerspectiveProjection();
+
+	// Handle reshaping (preparing NiViewer)
+	glViewport(0, 0, nw, nh);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
+	glMatrixMode(GL_MODELVIEW);
+
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glTranslatef(0,0,dist);
 	glRotatef(rX,0,1,0);
 	glRotatef(rY,1,0,0);
@@ -427,9 +425,23 @@ void onRender() {
 	//Show the fps
 	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 
-	resetPerspectiveProjection();
-
 	glutSwapBuffers();
+}
+
+void initGL() {
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+
+	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glEnable(GL_LIGHTING);
+	float ambientColor[]	= { 0.0f, 0.1f, 0.2f, 0.0f };//{0.5, 0.5, 0.5, 1};
+	float diffuseColor[]	= { 1.0f, 1.0f, 1.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
+	glEnable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
 }
 
 void mouseCallback(int button, int s, int x, int y)

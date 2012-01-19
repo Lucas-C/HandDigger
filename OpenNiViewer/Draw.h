@@ -47,7 +47,7 @@ typedef enum
 {
 	OVERLAY,
 	SIDE_BY_SIDE,
-	FOUR_PANNELS	// @@@dded
+	MODEL3D	// @@@dded
 } ScreenArrangementType;
 
 typedef enum 
