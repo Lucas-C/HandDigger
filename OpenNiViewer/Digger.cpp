@@ -390,9 +390,13 @@ void init() {
 
 #define HUD_BUFFER_SIZE 127
 char buffer[HUD_BUFFER_SIZE];
-void draw()
+void draw(bool inCorner)
 {
-	glViewport(0, 0, nw / 2, nh / 2);
+	if (inCorner)
+		glViewport(0, 0, nw / 2, nh / 2);
+	else
+		glViewport(0, 0, nw, nh);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
@@ -413,7 +417,9 @@ void draw()
 	}
 	snprintf(buffer, HUD_BUFFER_SIZE, "FPS: %3.2f", fps);
 
+	glEnable(GL_DEPTH_TEST);
 	renderModels();
+	glDisable(GL_DEPTH_TEST);
 
 	//Show the fps
 	setOrthoForFont();
@@ -421,7 +427,8 @@ void draw()
 	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 	resetPerspectiveProjection();
 
-	glViewport(0, 0, nw, nh);
+	if (inCorner)
+		glViewport(0, 0, nw, nh);
 }
 
 void reshapeCallback(int nw_, int nh_) {

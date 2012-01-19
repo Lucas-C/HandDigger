@@ -198,7 +198,6 @@ void init_opengl()
 {
 	glClearStencil(128);
 
-	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	//glEnable(GL_NORMALIZE);
 
@@ -303,7 +302,8 @@ void createKeyboardMap()
 			registerKey('0', getPresetName(10), setPreset, 10);
 			registerKey('-', getPresetName(11), setPreset, 11);
 			registerKey('=', getPresetName(12), setPreset, 12);
-			registerKey('h', getPresetName(13), setPreset, 13);	// @@@dded
+			registerKey('m', getPresetName(13), setPreset, 13);	// @@@dded
+			registerKey('h', getPresetName(13), setPreset, 14);	// @@@dded
 		}
 		endKeyboardGroup();
 		startKeyboardGroup(KEYBOARD_GROUP_DEVICE);

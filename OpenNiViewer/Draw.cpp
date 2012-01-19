@@ -127,21 +127,22 @@ float g_fMaxDepth;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
-	// NAME,								BACKGRD,        { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
+	// NAME,								BACKGRD, MDL3D, { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
 	{ "Standard Deviation",					{ false, false, { STANDARD_DEVIATION,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Depth Histogram",					{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_OFF },				OVERLAY } },
+	{ "Depth Histogram",					{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_OFF },				OVERLAY } },
 	{ "Psychedelic Depth [Centimeters]",	{ false, false, { PSYCHEDELIC,			1 }, { IMAGE_OFF },				OVERLAY } },
 	{ "Psychedelic Depth [Millimeters]",	{ false, false, { PSYCHEDELIC_SHADES,	1 }, { IMAGE_OFF },				OVERLAY } },
 	{ "Rainbow Depth",						{ false, false, { CYCLIC_RAINBOW,		1 }, { IMAGE_OFF },				OVERLAY } },
 	{ "Depth masked Image",					{ false, false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
 	{ "Background Removal",					{ true,	 false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
-	{ "Side by Side",						{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			SIDE_BY_SIDE } },
-	{ "Depth on Image",						{ false, false, { LINEAR_HISTOGRAM,	1 },	 { IMAGE_NORMAL },			OVERLAY } },
-	{ "Transparent Depth on Image",			{ false, false, { LINEAR_HISTOGRAM,  0.6 },  { IMAGE_NORMAL },			OVERLAY } },
+	{ "Side by Side",						{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			SIDE_BY_SIDE } },
+	{ "Depth on Image",						{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Transparent Depth on Image",			{ false, false, { LINEAR_HISTOGRAM,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Hand Digger !",						{ false, true,  { LINEAR_HISTOGRAM	,	1 }, { IMAGE_NORMAL },			THREE_PANNELS } },	//	@@@dded
+	{ "Hand Digger - Model3D",				{ false, true,  { DEPTH_OFF,			1 }, { IMAGE_OFF },				OVERLAY } },	//	@@@dded
+	{ "Hand Digger - Three pannels",		{ false, true,  { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			THREE_PANNELS } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -1531,7 +1532,6 @@ void drawFrame()
 		TextureMapInit(&g_texImage, pImageMD->FullXRes(), pImageMD->FullYRes(), 4, pImageMD->XRes(), pImageMD->YRes());
 		fixLocation(&g_DrawConfig.ImageLocation, pImageMD->FullXRes(), pImageMD->FullYRes());
 	}
-	// TODO: handle the same for Model3D ?
 
 	// check if pointer is over a map
 	bool bOverDepth = (pDepthMD != NULL) && isPointInRect(g_DrawUserInput.Cursor, &g_DrawConfig.DepthLocation);
@@ -1554,27 +1554,38 @@ void drawFrame()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	// Setup the opengl env for fixed location view
-	glMatrixMode(GL_PROJECTION);
-	// @@@nnoyingly useless glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
-	// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
+	if (!(g_DrawConfig.Streams.bModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY)) {	// @@@dded
+		// Setup the opengl env for fixed location view
+		glMatrixMode(GL_PROJECTION);
+		// @@@nnoyingly useless glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+		// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
 
-	if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
-		calculateHistogram();
+		if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
+			calculateHistogram();
 
-	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
+		drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
 
-	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+		drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
 
-	printStatisticsInfo();
-	printRecordingInfo();
+		printStatisticsInfo();
+		printRecordingInfo();
+	}
 
 	// @@@dded
+	static bool overlayModel3D = false;
 	if (g_DrawConfig.Streams.bModel3D) {
-		Digger::draw();
+		if (overlayModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY) {
+			glClearColor(0.3f, 0.4f, 0.5f, 1.0);
+			overlayModel3D = true;
+		}
+		Digger::draw(g_DrawConfig.Streams.ScreenArrangement == THREE_PANNELS);
 	} else {
+		if (overlayModel3D) {
+			glClearColor(0, 0, 0, 1);
+			overlayModel3D = false;
+		}
 		if (g_DrawConfig.bShowPointer)
 			drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
 

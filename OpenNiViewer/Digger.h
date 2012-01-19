@@ -4,7 +4,7 @@
 namespace Digger
 {
 	void init();
-	void draw();
+	void draw(bool inCorner);
 
 	void mouseCallback(int, int, int, int);
 	void motionCallback(int, int);
