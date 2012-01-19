@@ -5,12 +5,11 @@ namespace Digger
 {
 	void init();
 	void draw();
-	void finalize();
 
-	void arrowKeyCallback(int, int, int);
-	void keyboardCallback(unsigned char, int, int);
 	void mouseCallback(int, int, int, int);
 	void motionCallback(int, int);
+	void keyboardCallback(unsigned char, int, int);
+	void arrowKeyCallback(int, int, int);
 	void reshapeCallback(int, int);
 }
 

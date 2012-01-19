@@ -141,7 +141,7 @@ DrawConfigPreset g_Presets[PRESET_COUNT] =
 	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Hand Digger !",						{ false, true,  { DEPTH_OFF			,	1 }, { IMAGE_OFF },				MODEL3D } },	//	@@@dded
+	{ "Hand Digger !",						{ false, true,  { LINEAR_HISTOGRAM	,	1 }, { IMAGE_NORMAL },			THREE_PANNELS } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -777,7 +777,7 @@ void drawClosedStream(UIntRect* pLocation, const char* csStreamName)
 
 void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 {
-	if (!isImageOn() && !isIROn() && !g_DrawConfig.Streams.bModel3D) // @@@dded
+	if (!isImageOn() && !isIROn())
 	{
 		drawClosedStream(pLocation, "Image");
 		return;
@@ -1500,8 +1500,8 @@ void drawFrame()
 	g_DrawConfig.ImageLocation.uLeft = 0;
 	g_DrawConfig.ImageLocation.uRight = WIN_SIZE_X - 1;
 
-	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
-	{
+	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE
+	||  g_DrawConfig.Streams.ScreenArrangement == THREE_PANNELS) {
 		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
 		g_DrawConfig.ImageLocation.uTop = WIN_SIZE_Y / 2 - 1;
@@ -1554,45 +1554,35 @@ void drawFrame()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	// Setup the opengl env for fixed location view
+	glMatrixMode(GL_PROJECTION);
+	// @@@nnoyingly useless glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+	// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
+
+	if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
+		calculateHistogram();
+
+	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
+
+	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+
+	printStatisticsInfo();
+	printRecordingInfo();
+
 	// @@@dded
-	static bool displayingModel3D = false;
 	if (g_DrawConfig.Streams.bModel3D) {
-		if (!displayingModel3D) {
-			Digger::init();
-			displayingModel3D = true;
-		}
 		Digger::draw();
 	} else {
-		if (displayingModel3D) {
-			Digger::finalize();
-			displayingModel3D = false;
-		}
-
-		// Setup the opengl env for fixed location view
-		glMatrixMode(GL_PROJECTION);
-		// @@@nnoyingly useless glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
-		// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
-
-		if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
-			calculateHistogram();
-
-		drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
-
-		drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
-
-		printStatisticsInfo();
-		printRecordingInfo();
-
 		if (g_DrawConfig.bShowPointer)
 			drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
 
 		drawUserInput(!bOverDepth && !bOverImage);
-
-		drawUserMessage();
-		drawPlaybackSpeed();
 	}
+	
+	drawUserMessage();
+	drawPlaybackSpeed();
 
 	if (g_DrawConfig.strErrorState != NULL)
 		drawErrorState();

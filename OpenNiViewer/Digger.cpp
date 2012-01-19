@@ -379,10 +379,6 @@ void renderModels()
 }
 
 void init() {
-	glDisable(GL_NORMALIZE);
-	glEnable(GL_DEPTH_TEST);
-
-	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
 	glEnable(GL_COLOR_MATERIAL);
 
 	glEnable(GL_LIGHTING);
@@ -392,19 +388,11 @@ void init() {
 	glDisable(GL_LIGHTING);
 }
 
-void finalize() {
-	glClearColor(0, 0, 0, 1);
-	glDisable(GL_COLOR_MATERIAL);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-	glEnable(GL_NORMALIZE);
-	glDisable(GL_DEPTH_TEST);
-}
-
 #define HUD_BUFFER_SIZE 127
 char buffer[HUD_BUFFER_SIZE];
 void draw()
 {
-	glViewport(0, 0, nw, nh);
+	glViewport(0, 0, nw / 2, nh / 2);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
@@ -432,6 +420,8 @@ void draw()
 	glColor3f(1,1,1);
 	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 	resetPerspectiveProjection();
+
+	glViewport(0, 0, nw, nh);
 }
 
 void reshapeCallback(int nw_, int nh_) {
