@@ -76,6 +76,7 @@ void mouseInputMotion(int x, int y)
 
 void mouseInputButton(int button, int state, int x, int y)
 {
+	/* @@@annoyingly bugging with depth
 	if (button == GLUT_LEFT_BUTTON)
 	{
 		if (state == GLUT_DOWN)
@@ -95,7 +96,7 @@ void mouseInputButton(int button, int state, int x, int y)
 
 			g_MouseInput.nSelectionState = SELECTION_NONE;
 		}
-	}
+	}*/
 }
 
 void mouseInputRegisterForSelectionRectangle(SelectionRectangleChangedPtr pFunc)

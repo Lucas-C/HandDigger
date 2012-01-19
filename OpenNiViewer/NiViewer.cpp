@@ -302,7 +302,7 @@ void createKeyboardMap()
 			registerKey('0', getPresetName(10), setPreset, 10);
 			registerKey('-', getPresetName(11), setPreset, 11);
 			registerKey('=', getPresetName(12), setPreset, 12);
-			registerKey('m', getPresetName(13), setPreset, 13);	// @@@dded
+			registerKey('j', getPresetName(13), setPreset, 13);	// @@@dded
 			registerKey('h', getPresetName(13), setPreset, 14);	// @@@dded
 		}
 		endKeyboardGroup();
