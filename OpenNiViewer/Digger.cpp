@@ -52,7 +52,8 @@ namespace Digger
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
 			diggerHandHeight	= 0.5, // Distance from M to ground
-			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5;
+			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
+			vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
 
 // Aesthetic ones
 const float	jointRadius	= 0.3f,
@@ -80,7 +81,7 @@ int		totalFrames	= 0;
 
 Point computeVfromM();
 // Global point variables
-Point O, M(6, 0, 1), V(computeVfromM());
+Point O, goal(6, 0, 1), V(computeVfromM()), M(goal);
 
 
 /*** Model-related functions ***/
@@ -337,15 +338,13 @@ void drawArm(Point p1, Point p2)
 	glPopMatrix();
 }
 
+void updatePosDigger();
 void renderModels()
 {
 	drawAxes();
 	drawXYGrid(10);
 
-	//V = computeVfromM();
-// 	TRACE("M = " << M);
-// 	TRACE("V = " << V);
-// 	testComputation();
+	updatePosDigger();
 
 	glEnable(GL_LIGHTING);
 		drawCabin();
@@ -502,6 +501,40 @@ void setPosDigger(double x, double y, double z)
 void setPosDiggerScaled(double x, double y, double z)
 {
 	setPosDigger(x / 40, y / 40, z / 40);
+}
+
+void setGoalDigger(double x, double y, double z)
+{
+	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
+	Point candidate(x, y, z);
+	if (candidate.x > 0
+	&&	candidate.squareNorm() < distMaxSquared) {
+		goal = candidate;
+	}
+}
+
+void setGoalDiggerScaled(double x, double y, double z)
+{
+	setGoalDigger(x / 40, y / 40, z / 40);
+}
+
+void updatePosDigger()
+{
+	Point direction(goal.x - M.x, goal.y - M.y, goal.z - M.z);
+	float normDirection = sqrt(direction.squareNorm());
+	if (normDirection > vitesseMax) {
+		float rapport = vitesseMax / normDirection;
+		direction.x *= rapport;
+		direction.y *= rapport;
+		direction.z *= rapport;
+	}
+	M.x += direction.x;
+	M.y += direction.y;
+	M.z += direction.z;
+	V = computeVfromM();
+// 	TRACE("M = " << M);
+// 	TRACE("V = " << V);
+// 	testComputation();
 }
 
 }

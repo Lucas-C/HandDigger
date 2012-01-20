@@ -6,6 +6,8 @@ namespace Digger
 	void init();
 	void setPosDigger(double x, double y, double z);
 	void setPosDiggerScaled(double x, double y, double z);
+	void setGoalDigger(double x, double y, double z);
+	void setGoalDiggerScaled(double x, double y, double z);
 	void draw(bool inCorner);
 
 	void mouseCallback(int, int, int, int);
