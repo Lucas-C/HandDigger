@@ -453,22 +453,22 @@ void keyboardCallback(unsigned char key, int, int)
 			exit(0);
 			break;
 		case 100: // Left arrow
-			setPosDigger(M.x - arrowStep, M.y, M.z);
+			setPosDigger(M + Point(0, arrowStep, 0));
 			break;
 		case 101: // Up arrow
-			setPosDigger(M.x, M.y + arrowStep, M.z);
+			setPosDigger(M + Point(arrowStep, 0, 0));
 			break;
 		case 102: // Right arrow
-			setPosDigger(M.x + arrowStep, M.y, M.z);
+			setPosDigger(M + Point(0, -arrowStep, 0));
 			break;
 		case 103: // Down arrow
-			setPosDigger(M.x, M.y - arrowStep, M.z);
+			setPosDigger(M + Point(-arrowStep, 0, 0));
 			break;
 		case 104: // PageUp
-			setPosDigger(M.x, M.y, M.z + arrowStep);
+			setPosDigger(M + Point(0, 0, arrowStep));
 			break;
 		case 105: // PageDown
-			setPosDigger(M.x, M.y, M.z - arrowStep);
+			setPosDigger(M + Point(0, 0, -arrowStep));
 			break;
 		default:
 			TRACE("Key (" << (int)key << ") not handled.");
@@ -481,41 +481,29 @@ void arrowKeyCallback(int key, int x, int y)
 	keyboardCallback((unsigned char)key, x, y);
 }
 
-void setPosDigger(double x, double y, double z)
+void setPosDigger(const Point& pos)
 {
-	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
-	Point candidate(x, y, z);
-	if (candidate.x > 0
-	&&	candidate.squareNorm() < distMaxSquared) {
+	TRACE_(pos);
+	if (pos.x > 0
+	&&	pos.squareNorm() < distMaxSquared) {
 		Point	oldM = M,
 				oldV = V;
-		M = candidate;
+		goal = M = pos;
 		V = computeVfromM();
 		if (V.x < 0) {
-			M = oldM;
+			goal = M = oldM;
 			V = oldV;
 		}
 	}
 }
 
-void setPosDiggerScaled(double x, double y, double z)
+void setGoalDigger(const Point& g)
 {
-	setPosDigger(x / 40, y / 40, z / 40);
-}
-
-void setGoalDigger(double x, double y, double z)
-{
-	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
-	Point candidate(x, y, z);
-	if (candidate.x > 0
-	&&	candidate.squareNorm() < distMaxSquared) {
-		goal = candidate;
+	TRACE_(g);
+	if (g.x > 0
+	&&	g.squareNorm() < distMaxSquared) {
+		goal = g;
 	}
-}
-
-void setGoalDiggerScaled(double x, double y, double z)
-{
-	setGoalDigger(x / 40, y / 40, z / 40);
 }
 
 void updatePosDigger()

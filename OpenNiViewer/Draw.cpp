@@ -53,6 +53,12 @@
 	#endif
 #endif
 
+
+#define USE_SLIDING_WINDOW_EXP
+#include "Point.h"
+#include "SlidingWindow.h"
+SlidingWindow<Point> meanGoal;
+
 // --------------------------------
 // Defines
 // --------------------------------
@@ -848,11 +854,15 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	if (centres[0].z == 0 || centres[1].z == 0) {
 		absurdeGcheDte = true;
 	}
-	if (!absurdeAvtArr && !absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1].x - centres[0].x, centres[0].z - centres[1].z, centres[0].y - centres[1].y);
-	}
-	if (!absurdeAvtArr && absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1].x - centres[0].x, 0, centres[0].y - centres[1].y);
+
+	Point p(centres[0] - centres[1]), goal(-p.x, p.z, p.y);
+	meanGoal.push(goal);
+	goal = meanGoal.mean();
+
+	if (!absurdeAvtArr) {
+		if (absurdeGcheDte)
+			goal.y = 0;
+		Digger::setPosDigger(goal);
 	}
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
