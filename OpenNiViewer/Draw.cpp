@@ -54,7 +54,7 @@
 #endif
 
 
-#define USE_SLIDING_WINDOW_EXP
+#define USE_SLIDING_WINDOW_NONE
 #include "Point.h"
 #include "SlidingWindow.h"
 SlidingWindow<Point> meanGoal;
