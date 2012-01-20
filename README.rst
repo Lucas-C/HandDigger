@@ -31,6 +31,14 @@ BONUS:
 - vues dans multiples fenêtres
 
 
+Notes
+=====
+
+Pour travailler sans Kinnect : insérer un "!--" après le chevron ouvrant ligne 17 de SampleConfig.xml pour commenter les nodes de config du Kinnect
+(la ligne devient : <!--Node type="Image" name="Image1">)
+
+git config core.filemode false
+
 
 ===========
 Description

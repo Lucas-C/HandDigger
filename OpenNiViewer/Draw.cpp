@@ -26,6 +26,9 @@
 // --------------------------------
 // Includes
 // --------------------------------
+#include <iostream>	//	@@@dded
+#include "Digger.h"	//	@@@dded
+
 #include "Draw.h"
 #include "Device.h"
 #include "Keyboard.h"
@@ -125,20 +128,22 @@ float g_fMaxDepth;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
-	// NAME,								BACKGRD, { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
-	{ "Standard Deviation",					{ false, { STANDARD_DEVIATION,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Depth Histogram",					{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Psychedelic Depth [Centimeters]",	{ false, { PSYCHEDELIC,			1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Psychedelic Depth [Millimeters]",	{ false, { PSYCHEDELIC_SHADES,	1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Rainbow Depth",						{ false, { CYCLIC_RAINBOW,		1 }, { IMAGE_OFF },				OVERLAY } },
-	{ "Depth masked Image",					{ false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
-	{ "Background Removal",					{ true,	 { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
-	{ "Side by Side",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			SIDE_BY_SIDE } },
-	{ "Depth on Image",						{ false, { LINEAR_HISTOGRAM,	1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Transparent Depth on Image",			{ false, { LINEAR_HISTOGRAM,  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Rainbow Depth on Image",				{ false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Cyclic Rainbow Depth on Image",		{ false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Image Only",							{ false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
+	// NAME,								BACKGRD, MDL3D, { Depth_Type, Transparency}, { Image_Type  }			Arrangement }}
+	{ "Standard Deviation",					{ false, false, { STANDARD_DEVIATION,	1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Depth Histogram",					{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Psychedelic Depth [Centimeters]",	{ false, false, { PSYCHEDELIC,			1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Psychedelic Depth [Millimeters]",	{ false, false, { PSYCHEDELIC_SHADES,	1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Rainbow Depth",						{ false, false, { CYCLIC_RAINBOW,		1 }, { IMAGE_OFF },				OVERLAY } },
+	{ "Depth masked Image",					{ false, false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
+	{ "Background Removal",					{ true,	 false, { DEPTH_OFF,			1 }, { DEPTH_MASKED_IMAGE },	OVERLAY } },
+	{ "Side by Side",						{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			SIDE_BY_SIDE } },
+	{ "Depth on Image",						{ false, false, { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Transparent Depth on Image",			{ false, false, { LINEAR_HISTOGRAM,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
+	{ "Hand Digger - Model3D",				{ false, true,  { DEPTH_OFF,			1 }, { IMAGE_OFF },				OVERLAY } },	//	@@@dded
+	{ "Hand Digger - Three pannels",		{ false, true,  { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			THREE_PANNELS } },	//	@@@dded
 };
 
 /* Texture maps for depth and image */
@@ -523,12 +528,13 @@ void drawInit()
 
 	CreateRainbowPallet();
 
-	setPreset(7);
+	setPreset(13);
 
 	TextureMapInit(&g_texBackground, 1024, 1024, 3, 1024, 1024);
 
 	// load background image
-	xnOSLoadFile("..\\..\\..\\Data\\RGBViewer\\back.raw", TextureMapGetLine(&g_texBackground, 0), 1024*1024*3);
+	if (XN_STATUS_OK != xnOSLoadFile(BACKGROUND_IMG_NAME, TextureMapGetLine(&g_texBackground, 0), 1024*1024*3))
+		std::cerr << "!! Failed to load background image " << BACKGROUND_IMG_NAME << "\n";	//	@@@dded
 
 	TextureMapUpdate(&g_texBackground);
 
@@ -1523,8 +1529,8 @@ void drawFrame()
 	g_DrawConfig.ImageLocation.uLeft = 0;
 	g_DrawConfig.ImageLocation.uRight = WIN_SIZE_X - 1;
 
-	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE)
-	{
+	if (g_DrawConfig.Streams.ScreenArrangement == SIDE_BY_SIDE
+	||  g_DrawConfig.Streams.ScreenArrangement == THREE_PANNELS) {
 		g_DrawConfig.DepthLocation.uTop = WIN_SIZE_Y / 2 - 1;
 		g_DrawConfig.DepthLocation.uRight = WIN_SIZE_X / 2 - 1;
 		g_DrawConfig.ImageLocation.uTop = WIN_SIZE_Y / 2 - 1;
@@ -1540,7 +1546,6 @@ void drawFrame()
 	}
 
 	const MapMetaData* pImageMD = NULL;
-
 	if (isImageOn())
 	{
 		pImageMD = getImageMetaData();
@@ -1577,28 +1582,45 @@ void drawFrame()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	// Setup the opengl env for fixed location view
-	glMatrixMode(GL_PROJECTION);
-	//glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
-	//glDisable(GL_DEPTH_TEST); 
 
-	if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
-		calculateHistogram();
+	if (!(g_DrawConfig.Streams.bModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY)) {	// @@@dded
+		// Setup the opengl env for fixed location view
+		glMatrixMode(GL_PROJECTION);
+		// @@@nnoyingly useless glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
+		// @@@nnoyingly useless glDisable(GL_DEPTH_TEST); 
 
-	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
+		if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
+			calculateHistogram();
 
-	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+		drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
 
-	printStatisticsInfo();
-	printRecordingInfo();
+		drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
 
-	if (g_DrawConfig.bShowPointer)
-		drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
+		printStatisticsInfo();
+		printRecordingInfo();
+	}
 
-	drawUserInput(!bOverDepth && !bOverImage);
+	// @@@dded
+	static bool overlayModel3D = false;
+	if (g_DrawConfig.Streams.bModel3D) {
+		if (overlayModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY) {
+			glClearColor(0.3f, 0.4f, 0.5f, 1.0);
+			overlayModel3D = true;
+		}
+		Digger::draw(g_DrawConfig.Streams.ScreenArrangement == THREE_PANNELS);
+	} else {
+		if (overlayModel3D) {
+			glClearColor(0, 0, 0, 1);
+			overlayModel3D = false;
+		}
+		if (g_DrawConfig.bShowPointer)
+			drawPointerMode(bOverDepth ? &pointerInDepth : NULL);
 
+		drawUserInput(!bOverDepth && !bOverImage);
+	}
+	
 	drawUserMessage();
 	drawPlaybackSpeed();
 

@@ -37,7 +37,8 @@
 #define WIN_SIZE_X 1280
 #define WIN_SIZE_Y 1024
 
-#define PRESET_COUNT 13
+#define PRESET_COUNT 15					// @@@dded
+#define BACKGROUND_IMG_NAME "back.raw"	// @@@dded
 
 // --------------------------------
 // Types
@@ -45,7 +46,8 @@
 typedef enum
 {
 	OVERLAY,
-	SIDE_BY_SIDE
+	SIDE_BY_SIDE,
+	THREE_PANNELS	// @@@dded
 } ScreenArrangementType;
 
 typedef enum 
@@ -86,6 +88,7 @@ typedef struct
 typedef struct
 {
 	bool bBackground;
+	bool bModel3D;
 	DepthDrawConfig Depth;
 	ImageDrawConfig Image;
 	ScreenArrangementType ScreenArrangement;

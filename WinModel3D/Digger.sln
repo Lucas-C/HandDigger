@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Digger", "Digger.vcxproj", "{98122DD2-BFE1-4CA8-0147-E4168A7368C8}"
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98122DD2-BFE1-4CA8-0147-E4168A7368C8}.Debug|Win32.ActiveCfg = Release|Win32
+		{98122DD2-BFE1-4CA8-0147-E4168A7368C8}.Debug|Win32.Build.0 = Release|Win32
+		{98122DD2-BFE1-4CA8-0147-E4168A7368C8}.Release|Win32.ActiveCfg = Release|Win32
+		{98122DD2-BFE1-4CA8-0147-E4168A7368C8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

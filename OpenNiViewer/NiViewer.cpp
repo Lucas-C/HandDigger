@@ -1,6 +1,3 @@
-//#define HAND_DIGGER
-#ifndef HAND_DIGGER
-
 /*****************************************************************************
 *                                                                            *
 *  OpenNI 1.0 Alpha                                                          *
@@ -88,6 +85,8 @@ using namespace glh;
 	#define _getch() getchar()
 #endif
 
+#include "Digger.h"
+
 // --------------------------------
 // Defines
 // --------------------------------
@@ -111,12 +110,11 @@ bool g_bPause = false;
 /* When true, only a single frame will be read, and then reading will be paused. */
 bool g_bStep = false;
 
-glut_simple_mouse_interactor camera, light, room, object;
+glut_simple_mouse_interactor camera, light, object;
 display_list face;
 vec4f light_position(1,1,1,1);
-float room_ambient = .4;
 glut_perspective_reshaper reshaper;
-glut_callbacks cb;
+glut_callbacks cb, digger;
 
 UIntPair mouseLocation;
 UIntPair windowSize;
@@ -199,12 +197,12 @@ void seek(int nDiff)
 void init_opengl()
 {
 	glClearStencil(128);
-	//glEnable(GL_DEPTH_TEST);
+
 	glDepthFunc(GL_LESS);
-	glEnable(GL_NORMALIZE);
+	//glEnable(GL_NORMALIZE);
 
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-	GLfloat ambient[] = {0.5, 0.5, 0.5, 1};
+	GLfloat ambient[] = {0.0, 0.1, 0.2, 0.0};
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glLightf (GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1);
 	face.new_list(GL_COMPILE);
@@ -304,6 +302,8 @@ void createKeyboardMap()
 			registerKey('0', getPresetName(10), setPreset, 10);
 			registerKey('-', getPresetName(11), setPreset, 11);
 			registerKey('=', getPresetName(12), setPreset, 12);
+			registerKey('j', getPresetName(13), setPreset, 13);	// @@@dded
+			registerKey('h', getPresetName(13), setPreset, 14);	// @@@dded
 		}
 		endKeyboardGroup();
 		startKeyboardGroup(KEYBOARD_GROUP_DEVICE);
@@ -368,6 +368,7 @@ void createMenu()
 			{
 				createMenuEntry("Side by Side", setScreenLayout, (int)SIDE_BY_SIDE);
 				createMenuEntry("Overlay", setScreenLayout, (int)OVERLAY);
+				createMenuEntry("Four Pannels", setScreenLayout, (int)THREE_PANNELS);	// @@@dded
 			}
 			endSubMenu();
 			startSubMenu("Depth");
@@ -568,21 +569,8 @@ int changeDirectory(char* arg0)
 	return 0;
 }
 
-#else // HAND_DIGGER
-
-#include "Digger.h"
-
-#endif HAND_DIGGER
-
 int main(int argc, char **argv)
 {
-#ifdef HAND_DIGGER
-
-	digger(argc, argv); // WILL NEVER RETURN
-	return 0;
-
-#else // HAND_DIGGER
-
 //	try
 	{
 		if (argc == 2)
@@ -615,7 +603,7 @@ int main(int argc, char **argv)
 			errors.ToString(strError, 1024);
 			printf("%s\n", strError);
 			closeSample(ERR_DEVICE);
-			return (rc);
+			return (rc); // NEVER REACHED
 		}
 		else if (rc != XN_STATUS_OK)
 		{
@@ -628,8 +616,8 @@ int main(int argc, char **argv)
 		printf ("Unknown error!\n");
 		closeSample(ERR_DEVICE);
 	}
-
 	audioInit();
+
 	captureInit(SAMPLE_XML_PATH);
 	statisticsInit();
 
@@ -637,7 +625,7 @@ int main(int argc, char **argv)
 	reshaper.zFar = 100;
 	glut_add_interactor(&reshaper);
 
-	cb.mouse_function = MouseCallback;
+	//cb.mouse_function = MouseCallback; @@@annoyingly bugging with depth
 	cb.motion_function = MotionCallback;
 	cb.passive_motion_function = MotionCallback;
 	cb.keyboard_function = KeyboardCallback;
@@ -647,11 +635,12 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayString("stencil double rgb");
 	glutInitWindowSize(WIN_SIZE_X, WIN_SIZE_Y);
-	glutCreateWindow("OpenNI Viewer");
+	glutCreateWindow("DiggerHand prototype");
 	glutFullScreen();
 	glutSetCursor(GLUT_CURSOR_NONE);
 
 	init_opengl();
+	Digger::init();	// @@@dded
 
 	glut_helpers_initialize();
 
@@ -677,6 +666,14 @@ int main(int argc, char **argv)
 	glut_add_interactor(&light);
 	glut_add_interactor(&object);
 
+	// @@@dded
+	digger.mouse_function = Digger::mouseCallback;
+	digger.motion_function = Digger::motionCallback;
+	digger.keyboard_function = Digger::keyboardCallback;
+	digger.special_function = Digger::arrowKeyCallback;
+	digger.reshape_function = Digger::reshapeCallback;
+	glut_add_interactor(&digger);
+
 	camera.translator.t = vec3f(0, 0, 0);
 	camera.trackball.r = rotationf(vec3f(0, 0, 0), to_radians(0));
 
@@ -700,5 +697,4 @@ int main(int argc, char **argv)
 	closeSample(ERR_OK);
 
 	return (ERR_OK);
-#endif // HAND_DIGGER
 }

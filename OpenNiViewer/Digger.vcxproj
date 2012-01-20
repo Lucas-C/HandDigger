@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>NiViewer</ProjectName>
+    <ProjectName>Digger</ProjectName>
     <ProjectGuid>{98122DD2-BFE1-4CA8-0147-E4168A7368C8}</ProjectGuid>
-    <RootNamespace>NiViewer</RootNamespace>
+    <RootNamespace>Digger</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -112,6 +112,7 @@
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Capture.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Digger.cpp" />
     <ClCompile Include="Draw.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalOptions)</AdditionalOptions>
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>

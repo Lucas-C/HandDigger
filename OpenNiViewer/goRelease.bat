@@ -1,1 +1,1 @@
-Bin\Release\NiViewer.exe
+Bin\Release\Digger.exe

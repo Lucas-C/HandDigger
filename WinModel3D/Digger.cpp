@@ -1,5 +1,5 @@
 /**
-	@file Digger.cpp
+	@file digger.cpp
 	@brief Mechanical digger simulation
 
 We consider four elements :
@@ -37,29 +37,32 @@ TODO: only use double ?
 #define snprintf _snprintf_s
 #endif
 
-#include "GL/glut.h"
-#define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
+//#include <GL/freeglut.h>
+#include <glh/glh_obs.h>
+#include <glh/glh_glut2.h>
+# define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
 
-#include "Digger.h"
 #include "Macros.hpp"
 
-
-namespace Digger
-{
 
 /*** Model parameters ***/
 
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
-			diggerHandHeight	= 0.5, // Distance from M to ground
-			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength);
+			diggerHandHeight	= 0.5; // Distance from M to ground
 
 // Aesthetic ones
 const float	jointRadius	= 0.3f,
 			cabinSize	= 3,
 			armRadius	= 0.2f;
 
-/*** Interface parameters ***/
+/*** Simulation parameters ***/
+
+// Display window parameters
+const int	WINDOW_WIDTH			= 1024,
+			WINDOW_HEIGHT			= 768,
+			REFRESH_PERIOD_IN_MS	= 1000 / 60;
+
 const float	arrowStep = 0.1f;
 
 // Camera parameters
@@ -96,7 +99,7 @@ inline std::ostream& operator<<(std::ostream &strm, Point p) {
 
 Point computeVfromM();
 // Global point variables
-Point O, M(6, 0, 1), V(computeVfromM());
+Point O, M(6, 1, 1), V(computeVfromM());
 // Point O, M(6, 0, 0), V(computeVfromM());
 
 
@@ -214,9 +217,9 @@ void setOrthoForFont()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	gluOrtho2D(0, nw, 0, nh);
+	gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
 	glScalef(1, -1, 1);
-	glTranslatef(0, -nh, 0);
+	glTranslatef(0, -WINDOW_HEIGHT, 0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -359,7 +362,7 @@ void renderModels()
 	drawAxes();
 	drawXYGrid(10);
 
-	//V = computeVfromM();
+	V = computeVfromM();
 // 	TRACE("M = " << M);
 // 	TRACE("V = " << V);
 // 	testComputation();
@@ -374,34 +377,21 @@ void renderModels()
 	glDisable(GL_LIGHTING);
 }
 
-void init() {
-	glEnable(GL_COLOR_MATERIAL);
-
-	glEnable(GL_LIGHTING);
-	float diffuseColor[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
-	glEnable(GL_LIGHT0);
-	glDisable(GL_LIGHTING);
+void onReshape(int nw_, int nh_) {
+	nw = nw_;
+	nh = nh_;
+/*
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+	glTranslatef(0,0,dist);
+	glRotatef(rX,0,1,0);
+	glRotatef(rY,1,0,0);
+*/
 }
 
 #define HUD_BUFFER_SIZE 127
 char buffer[HUD_BUFFER_SIZE];
-void draw(bool inCorner)
-{
-	if (inCorner)
-		glViewport(0, 0, nw / 2, nh / 2);
-	else
-		glViewport(0, 0, nw, nh);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
-
-	glTranslatef(0,0,dist);
-	glRotatef(rX,0,1,0);
-	glRotatef(rY,1,0,0);
-
+void onRender() {
 	//Calculate fps
 	totalFrames++;
 	int current = glutGet(GLUT_ELAPSED_TIME);
@@ -411,25 +401,47 @@ void draw(bool inCorner)
 		startTime = current;
 		totalFrames=0;
 	}
+
 	snprintf(buffer, HUD_BUFFER_SIZE, "FPS: %3.2f", fps);
 
-	glEnable(GL_DEPTH_TEST);
-	renderModels();
-	glDisable(GL_DEPTH_TEST);
-
-	//Show the fps
-	setOrthoForFont();
-	glColor3f(1,1,1);
-	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 	resetPerspectiveProjection();
 
-	if (inCorner)
-		glViewport(0, 0, nw, nh);
+	// Handle reshaping (preparing NiViewer)
+	glViewport(0, 0, nw, nh);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
+	glMatrixMode(GL_MODELVIEW);
+
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glTranslatef(0,0,dist);
+	glRotatef(rX,0,1,0);
+	glRotatef(rY,1,0,0);
+
+	renderModels();
+
+	setOrthoForFont();
+	glColor3f(1,1,1);
+	//Show the fps
+	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
+
+	glutSwapBuffers();
 }
 
-void reshapeCallback(int nw_, int nh_) {
-	nw = nw_;
-	nh = nh_;
+void initGL() {
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+
+	glClearColor(0.3f, 0.4f, 0.5f, 1.0);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glEnable(GL_LIGHTING);
+	float ambientColor[]	= { 0.0f, 0.1f, 0.2f, 0.0f };//{0.5, 0.5, 0.5, 1};
+	float diffuseColor[]	= { 1.0f, 1.0f, 1.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColor);
+	glEnable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
 }
 
 void mouseCallback(int button, int s, int x, int y)
@@ -459,7 +471,7 @@ void motionCallback(int x, int y)
 	oldY = y;
 }
 
-void keyboardCallback(unsigned char key, int, int)
+static void keyboardCallback(unsigned char key, int, int)
 {
 	switch(key)
 	{
@@ -469,22 +481,22 @@ void keyboardCallback(unsigned char key, int, int)
 			exit(0);
 			break;
 		case 100: // Left arrow
-			setPosDigger(M.x - arrowStep, M.y, M.z);
+			M.x -= arrowStep;
 			break;
 		case 101: // Up arrow
-			setPosDigger(M.x, M.y + arrowStep, M.z);
+			M.y += arrowStep;
 			break;
 		case 102: // Right arrow
-			setPosDigger(M.x + arrowStep, M.y, M.z);
+			M.x += arrowStep;
 			break;
 		case 103: // Down arrow
-			setPosDigger(M.x, M.y - arrowStep, M.z);
+			M.y -= arrowStep;
 			break;
 		case 104: // PageUp
-			setPosDigger(M.x, M.y, M.z + arrowStep);
+			M.z += arrowStep;
 			break;
 		case 105: // PageDown
-			setPosDigger(M.x, M.y, M.z - arrowStep);
+			M.z -= arrowStep;
 			break;
 		default:
 			TRACE("Key (" << (int)key << ") not handled.");
@@ -492,36 +504,44 @@ void keyboardCallback(unsigned char key, int, int)
 	}
 }
 
-void arrowKeyCallback(int key, int x, int y)
+static void arrowKeyCallback(int key, int x, int y)
 {
 	keyboardCallback((unsigned char)key, x, y);
 }
 
-void setPosDigger(double x, double y, double z)
+void refreshTimer(int millisec)
 {
-	const double dist = x * x + y * y + z * z;
-	if (x > 0
-	&&	z > 0
-	&&	dist < distMaxSquared) {
-		const double	oldMX = M.x,
-						oldMY = M.y,
-						oldMZ = M.z,
-						oldVX = V.x,
-						oldVY = V.y,
-						oldVZ = V.z;
-		M.x = x;
-		M.y = y;
-		M.z = z;
-		V = computeVfromM();
-		if (V.x < 0 || V.z < 0) {
-			M.x = oldMX;
-			M.y = oldMY;
-			M.z = oldMZ;
-			V.x = oldVX;
-			V.y = oldVY;
-			V.z = oldVZ;
-		}
-	}
+	glutTimerFunc(millisec, refreshTimer, millisec);
+	glutPostRedisplay();
 }
 
+
+/*** Program entry point ***/
+
+int main(int argc, char** argv) {
+// 	atexit(onShutdown);
+
+	TRACE("Use the mouse to rotate the camera or zoom with the middle button pressed.");
+	TRACE("Move the digger hand with arrow and page up/down keys.");
+
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+	glutSetWindow(glutCreateWindow("DiggerHand prototype"));
+
+	glutDisplayFunc(onRender);
+	glutTimerFunc(REFRESH_PERIOD_IN_MS, refreshTimer, REFRESH_PERIOD_IN_MS);
+	glutReshapeFunc(onReshape);
+
+	glutKeyboardFunc(keyboardCallback);
+	glutSpecialFunc(arrowKeyCallback);
+
+	glutMouseFunc(mouseCallback);
+	glutMotionFunc(motionCallback);
+
+	initGL();
+
+	glutMainLoop();
+
+	return 0;
 }
