@@ -122,6 +122,7 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="MouseInput.cpp" />
     <ClCompile Include="NiViewer.cpp" />
+    <ClCompile Include="SlidingWindow.cpp" />
     <ClCompile Include="Statistics.cpp" />
     <ClCompile Include="Toolbox.cpp" />
   </ItemGroup>
@@ -135,6 +136,7 @@
     <ClInclude Include="Macros.hpp" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MouseInput.h" />
+    <ClInclude Include="SlidingWindow.h" />
     <ClInclude Include="Statistics.h" />
     <ClInclude Include="Res\Resource-OpenNI.h" />
     <ClInclude Include="Toolbox.h" />

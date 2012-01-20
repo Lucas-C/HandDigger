@@ -1,13 +1,11 @@
-#ifndef __DIGGER_H__
-#define __DIGGER_H__
+#ifndef DEF_H_DIGGER_
+#define DEF_H_DIGGER_
 
 namespace Digger
 {
 	void init();
-	// Actually ignore y
-	// x = xWrist - xShoulder,
-	// z = zWrist - zShoulder,
 	void setPosDigger(double x, double y, double z);
+	void setPosDiggerScaled(double x, double y, double z);
 	void draw(bool inCorner);
 
 	void mouseCallback(int, int, int, int);
@@ -17,4 +15,4 @@ namespace Digger
 	void reshapeCallback(int, int);
 }
 
-#endif //__DIGGER_H__
+#endif //DEF_H_DIGGER_

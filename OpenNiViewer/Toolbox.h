@@ -1,3 +1,6 @@
+#ifndef DEF_H_TOOLBOX_
+#define DEF_H_TOOLBOX_
+
 #include <iostream>
 #include <istream>
 #include <fstream>
@@ -22,7 +25,6 @@ namespace Toolbox {
 
 	// Va placer régler centre[0] et centre[1] (convention : le centre le plus à gauche est l'extrémité du bras)
 	void reglerBras(std::vector<int*> centres, int width, int height);
-
-
-	
 };
+
+#endif //DEF_H_TOOLBOX_

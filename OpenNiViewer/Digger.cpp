@@ -60,8 +60,7 @@ const float	jointRadius	= 0.3f,
 			armRadius	= 0.2f;
 
 /*** Interface parameters ***/
-const double	scaleFactor	= 40,
-				arrowStep	= 0.1 * scaleFactor;
+const double arrowStep	= 0.1;
 
 // Camera parameters
 int		nw			= 0,
@@ -87,6 +86,8 @@ struct Point {
 	float z;
 	Point(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
 	Point() : x(0), y(0), z(0) {}
+	float squareNorm() const { return x * x + y * y + z * z; }
+	Point& operator/=(float f) { x /= f; y /= f; z /= f; return *this; }
 	std::ostream& operator>>(std::ostream &strm) const {
 		return strm << "  " << x << "  " << y << "  " << z;
 	}
@@ -376,6 +377,8 @@ void renderModels()
 }
 
 void init() {
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_ON);
+
 	glEnable(GL_COLOR_MATERIAL);
 
 	glEnable(GL_LIGHTING);
@@ -500,33 +503,24 @@ void arrowKeyCallback(int key, int x, int y)
 
 void setPosDigger(double x, double y, double z)
 {
-	x /= scaleFactor;
-	y /= scaleFactor;
-	z /= scaleFactor;
-	const double dist = x * x + y * y + z * z;
 	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
-	if (x > 0
-//	&&	z > diggerHandHeight
-	&&	dist < distMaxSquared) {
-		const double	oldMX = M.x,
-						oldMY = M.y,
-						oldMZ = M.z,
-						oldVX = V.x,
-						oldVY = V.y,
-						oldVZ = V.z;
-		M.x = x;
-		M.y = y;
-		M.z = z;
+	Point candidate(x, y, z);
+	if (candidate.x > 0
+	&&	candidate.squareNorm() < distMaxSquared) {
+		Point	oldM = M,
+				oldV = V;
+		M = candidate;
 		V = computeVfromM();
 		if (V.x < 0) {
-			M.x = oldMX;
-			M.y = oldMY;
-			M.z = oldMZ;
-			V.x = oldVX;
-			V.y = oldVY;
-			V.z = oldVZ;
+			M = oldM;
+			V = oldV;
 		}
 	}
+}
+
+void setPosDiggerScaled(double x, double y, double z)
+{
+	setPosDigger(x / 40, y / 40, z / 40);
 }
 
 }
