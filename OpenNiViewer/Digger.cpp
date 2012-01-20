@@ -98,7 +98,7 @@ inline std::ostream& operator<<(std::ostream &strm, Point p) {
 
 Point computeVfromM();
 // Global point variables
-Point O, M(6, 0, 1), V(computeVfromM());
+Point O, goal(6, 0, 1), V(computeVfromM()), M(goal);
 // Point O, M(6, 0, 0), V(computeVfromM());
 
 
@@ -521,6 +521,26 @@ void setPosDigger(double x, double y, double z)
 void setPosDiggerScaled(double x, double y, double z)
 {
 	setPosDigger(x / 40, y / 40, z / 40);
+}
+
+void setGoalDigger(double x, double y, double z)
+{
+	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
+	Point candidate(x, y, z);
+	if (candidate.x > 0
+	&&	candidate.squareNorm() < distMaxSquared) {
+		goal = candidate;
+	}
+}
+
+void setGoalDiggerScaled(double x, double y, double z)
+{
+	setPosDigger(x / 40, y / 40, z / 40);
+}
+
+void updatePosDigger()
+{
+	Point direction(goal.x - M.x, goal.y - M.y, goal.z);
 }
 
 }
