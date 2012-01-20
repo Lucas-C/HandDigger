@@ -30,6 +30,7 @@
 #include "Device.h"
 #include "Keyboard.h"
 #include "Capture.h"
+#include "Toolbox.h"
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
 	#include <GLUT/glut.h>
 	#include <OpenGL/gl.h>
@@ -785,17 +786,34 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 		return;
 
 	const MapMetaData* pImageMD;
-	const XnUInt8* pImage = NULL;
+	XnUInt8* pImage = NULL;
+	std::vector<int*> centres;
 
 	if (isImageOn())
 	{
 		pImageMD = getImageMetaData();
-		pImage = getImageMetaData()->Data();
+		//pImage = const_cast<XnUInt8*>(getImageMetaData()->Data());
+		MapMetaData* pImageMD2 = const_cast<MapMetaData*>(pImageMD);
+		pImage = pImageMD2->WritableData();             // RAAAAAAAAAAAHHHHH !
+		if (pImage == NULL) {
+			std::cout << "pImage est nul" << std::endl;
+		}
+
+		// Affichage de l'image en HSV (pour détecter les couleurs de marqueurs pertinentes) ------------------------------
+		//Toolbox::rgbToHsv(pImage, pImageMD->XRes(), pImageMD->YRes());
+
+		// Processus de détection de marqueurs --------------------------------------
+		// Détection des centres des marqueurs
+		centres = Toolbox::detecterCentres(pImage, pImageMD->XRes(), pImageMD->YRes());
+		// Différenciation du bras et de la main
+		Toolbox::reglerBras(centres, pImageMD->XRes(), pImageMD->YRes());
+		// Marquage des centres sur l'image (en carrés de couleurs)
+		Toolbox::placerMarqueurs(pImage, centres, pImageMD->XRes(), pImageMD->YRes());
 	}
 	else if (isIROn())
 	{
 		pImageMD = getIRMetaData();
-		pImage = (const XnUInt8*)getIRMetaData()->Data();
+		pImage = const_cast<XnUInt8*>((const XnUInt8*)getIRMetaData()->Data());
 	}
 	else
 		return;
@@ -806,6 +824,10 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	}
 
 	const DepthMetaData* pDepthMetaData = getDepthMetaData();
+	// Récupération de la carte de profondeur
+	XnDepthPixel* pImageDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
+	// Remplissage des valeurs de profondeur dans la liste de centres
+	Toolbox::remplirProfondeur(pImageDepth, centres, pDepthMetaData->XRes(), pDepthMetaData->YRes());
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
 	{
@@ -813,6 +835,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 		if (pImageMD->PixelFormat() == XN_PIXEL_FORMAT_YUV422)
 		{
+			std::cout << "Attention : image en YUV422" << std::endl;
 			YUV422ToRGB888(pImage, pTexture, pImageMD->XRes()*2, g_texImage.Size.X*g_texImage.nBytesPerPixel);
 			pImage += pImageMD->XRes()*2;
 		}
@@ -846,13 +869,18 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 					pTexture[0] = pImage[0];
 					pTexture[1] = pImage[1];
 					pTexture[2] = pImage[2];
+					/*if (isImageOn()) {
+						std::cout << "RGB = " << (int) pImage[0] << " " << (int) pImage[1] << " " << (int) pImage[2] << std::endl;
+					}*/
 					pImage+=3; 
 					break;
 				case XN_PIXEL_FORMAT_GRAYSCALE_8_BIT:
+					std::cout << "Attention : image en Grayscale 8 bits" << std::endl;
 					pTexture[0] = pTexture[1] = pTexture[2] = *pImage;
 					pImage+=1; 
 					break;
 				case XN_PIXEL_FORMAT_GRAYSCALE_16_BIT:
+					std::cout << "Attention : image en Grayscale 16 bits" << std::endl;
 					XnUInt16* p16 = (XnUInt16*)pImage;
 					pTexture[0] = pTexture[1] = pTexture[2] = (*p16) >> 2;
 					pImage+=2; 
@@ -1551,10 +1579,10 @@ void drawFrame()
 
 	// Setup the opengl env for fixed location view
 	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
+	//glPushMatrix();
 	glLoadIdentity();
 	glOrtho(0,WIN_SIZE_X,WIN_SIZE_Y,0,-1.0,1.0);
-	glDisable(GL_DEPTH_TEST); 
+	//glDisable(GL_DEPTH_TEST); 
 
 	if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
 		calculateHistogram();

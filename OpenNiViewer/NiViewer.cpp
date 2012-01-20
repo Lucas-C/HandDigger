@@ -199,7 +199,7 @@ void seek(int nDiff)
 void init_opengl()
 {
 	glClearStencil(128);
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_NORMALIZE);
 

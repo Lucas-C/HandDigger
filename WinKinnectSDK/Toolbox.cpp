@@ -9,7 +9,7 @@ namespace Toolbox
 	{
 		// Pour l'instant, requiert que les valeurs rgb entrées soient celles de la représentation RGB
 		if (marqId == ORANGE) {
-			return (redValue == 0 && greenValue > 150 && blueValue > 150);
+			return (redValue == 0 && greenValue > 80 && blueValue > 150);
 		} else {
 			cout << "surMarqueur : couleur de marqueur non implementee" << endl;
 			system("pause");

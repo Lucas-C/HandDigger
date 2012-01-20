@@ -13,6 +13,8 @@ class Image
 
 		void placerMarqueurs(unsigned char * image);
 
+		void remplirProfondeur(unsigned char * depth);
+
 
 	public:
 		int **mPositionsCenter;

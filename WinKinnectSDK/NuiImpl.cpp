@@ -434,13 +434,10 @@ void CSkeletalViewerApp::Nui_GotVideoAlert( )
 		for (int i = 0; i < 640*480*4; i++) {
 			pBufferCopie[i] = pBuffer[i];
 		}
-		rgbToHsv(pBufferCopie);
+		rgbToHsv(pBufferCopie); 
 
-		// DEFINIR LA COULEUR DU MARQUEUR RECHERCHE (en RGB)
-		/*float* couleurMarqueur = new float[3];
-		couleurMarqueur[0] = 0;
-		couleurMarqueur[1] = 0;
-		couleurMarqueur[2] = 255;*/
+		// Pour afficher l'image en HSV
+		//rgbToHsv(pBuffer);
 
 		// CREATION DE L'OBJET IMAGE ET DETECTION DU MARQUEUR (sur la copie en HSV)
 		Image imageCamera(1);
@@ -449,6 +446,7 @@ void CSkeletalViewerApp::Nui_GotVideoAlert( )
 		imageCamera.premiere_detection(pBufferCopie, marqueurs);
 
 		// LIBERATION MEMOIRE
+		free(pBufferCopie);
 
 		
 		// Affichage du centre du marqueur
