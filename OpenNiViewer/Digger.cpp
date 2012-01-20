@@ -1,5 +1,5 @@
 /**
-	@file digger.cpp
+	@file Digger.cpp
 	@brief Mechanical digger simulation
 
 We consider four elements :
@@ -40,6 +40,7 @@ TODO: only use double ?
 #include "GL/glut.h"
 #define glutSolidCylinder(base, height, slices, stacks) gluCylinder(gluNewQuadric(), base, base, height, slices, stacks)
 
+#include "Digger.h"
 #include "Macros.hpp"
 
 
@@ -50,20 +51,15 @@ namespace Digger
 
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
-			diggerHandHeight	= 0.5; // Distance from M to ground
+			diggerHandHeight	= 0.5, // Distance from M to ground
+			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength);
 
 // Aesthetic ones
 const float	jointRadius	= 0.3f,
 			cabinSize	= 3,
 			armRadius	= 0.2f;
 
-/*** Simulation parameters ***/
-
-// Display window parameters
-const int	WINDOW_WIDTH			= 1024,
-			WINDOW_HEIGHT			= 768,
-			REFRESH_PERIOD_IN_MS	= 1000 / 60;
-
+/*** Interface parameters ***/
 const float	arrowStep = 0.1f;
 
 // Camera parameters
@@ -100,7 +96,7 @@ inline std::ostream& operator<<(std::ostream &strm, Point p) {
 
 Point computeVfromM();
 // Global point variables
-Point O, M(6, 1, 1), V(computeVfromM());
+Point O, M(6, 0, 1), V(computeVfromM());
 // Point O, M(6, 0, 0), V(computeVfromM());
 
 
@@ -218,9 +214,9 @@ void setOrthoForFont()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	gluOrtho2D(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT);
+	gluOrtho2D(0, nw, 0, nh);
 	glScalef(1, -1, 1);
-	glTranslatef(0, -WINDOW_HEIGHT, 0);
+	glTranslatef(0, -nh, 0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -363,7 +359,7 @@ void renderModels()
 	drawAxes();
 	drawXYGrid(10);
 
-	V = computeVfromM();
+	//V = computeVfromM();
 // 	TRACE("M = " << M);
 // 	TRACE("V = " << V);
 // 	testComputation();
@@ -473,22 +469,22 @@ void keyboardCallback(unsigned char key, int, int)
 			exit(0);
 			break;
 		case 100: // Left arrow
-			M.x -= arrowStep;
+			setPosDigger(M.x - arrowStep, M.y, M.z);
 			break;
 		case 101: // Up arrow
-			M.y += arrowStep;
+			setPosDigger(M.x, M.y + arrowStep, M.z);
 			break;
 		case 102: // Right arrow
-			M.x += arrowStep;
+			setPosDigger(M.x + arrowStep, M.y, M.z);
 			break;
 		case 103: // Down arrow
-			M.y -= arrowStep;
+			setPosDigger(M.x, M.y - arrowStep, M.z);
 			break;
 		case 104: // PageUp
-			M.z += arrowStep;
+			setPosDigger(M.x, M.y, M.z + arrowStep);
 			break;
 		case 105: // PageDown
-			M.z -= arrowStep;
+			setPosDigger(M.x, M.y, M.z - arrowStep);
 			break;
 		default:
 			TRACE("Key (" << (int)key << ") not handled.");
@@ -499,6 +495,33 @@ void keyboardCallback(unsigned char key, int, int)
 void arrowKeyCallback(int key, int x, int y)
 {
 	keyboardCallback((unsigned char)key, x, y);
+}
+
+void setPosDigger(double x, double y, double z)
+{
+	const double dist = x * x + y * y + z * z;
+	if (x > 0
+	&&	z > 0
+	&&	dist < distMaxSquared) {
+		const double	oldMX = M.x,
+						oldMY = M.y,
+						oldMZ = M.z,
+						oldVX = V.x,
+						oldVY = V.y,
+						oldVZ = V.z;
+		M.x = x;
+		M.y = y;
+		M.z = z;
+		V = computeVfromM();
+		if (V.x < 0 || V.z < 0) {
+			M.x = oldMX;
+			M.y = oldMY;
+			M.z = oldMZ;
+			V.x = oldVX;
+			V.y = oldVY;
+			V.z = oldVZ;
+		}
+	}
 }
 
 }

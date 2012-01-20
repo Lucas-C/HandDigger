@@ -625,7 +625,7 @@ int main(int argc, char **argv)
 	reshaper.zFar = 100;
 	glut_add_interactor(&reshaper);
 
-	cb.mouse_function = MouseCallback;
+	//cb.mouse_function = MouseCallback; @@@annoyingly bugging with depth
 	cb.motion_function = MotionCallback;
 	cb.passive_motion_function = MotionCallback;
 	cb.keyboard_function = KeyboardCallback;

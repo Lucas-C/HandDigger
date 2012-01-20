@@ -4,6 +4,10 @@
 namespace Digger
 {
 	void init();
+	// Actually ignore y
+	// x = xWrist - xShoulder,
+	// z = zWrist - zShoulder,
+	void setPosDigger(double x, double y, double z);
 	void draw(bool inCorner);
 
 	void mouseCallback(int, int, int, int);
