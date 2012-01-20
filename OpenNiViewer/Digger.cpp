@@ -52,7 +52,8 @@ namespace Digger
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
 			diggerHandHeight	= 0.5, // Distance from M to ground
-			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5;
+			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
+			vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
 
 // Aesthetic ones
 const float	jointRadius	= 0.3f,
@@ -343,6 +344,7 @@ void renderModels()
 	drawAxes();
 	drawXYGrid(10);
 
+	updatePosDigger();
 	//V = computeVfromM();
 // 	TRACE("M = " << M);
 // 	TRACE("V = " << V);
@@ -517,12 +519,23 @@ void setGoalDigger(double x, double y, double z)
 
 void setGoalDiggerScaled(double x, double y, double z)
 {
-	setPosDigger(x / 40, y / 40, z / 40);
+	setGoalDigger(x / 40, y / 40, z / 40);
 }
 
 void updatePosDigger()
 {
-	Point direction(goal.x - M.x, goal.y - M.y, goal.z);
+	Point direction(goal.x - M.x, goal.y - M.y, goal.z - M.z);
+	float normDirection = sqrt(direction.squareNorm());
+	if (normDirection > vitesseMax) {
+		float rapport = vitesseMax / normDirection;
+		direction.x *= rapport;
+		direction.y *= rapport;
+		direction.z *= rapport;
+	}
+	M.x += direction.x;
+	M.y += direction.y;
+	M.z += direction.z;
+	V = computeVfromM();
 }
 
 }

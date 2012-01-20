@@ -848,10 +848,10 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 		absurdeGcheDte = true;
 	}
 	if (!absurdeAvtArr && !absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1][0] - centres[0][0], centres[0][2] - centres[1][2], centres[0][1] - centres[1][1]);
+		Digger::setGoalDiggerScaled(centres[1][0] - centres[0][0], centres[0][2] - centres[1][2], centres[0][1] - centres[1][1]);
 	}
 	if (!absurdeAvtArr && absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1][0] - centres[0][0], 0, centres[0][1] - centres[1][1]);
+		Digger::setGoalDiggerScaled(centres[1][0] - centres[0][0], 0, centres[0][1] - centres[1][1]);
 	}
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
