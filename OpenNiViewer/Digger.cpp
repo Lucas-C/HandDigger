@@ -512,13 +512,9 @@ void updatePosDigger()
 	float normDirection = sqrt(direction.squareNorm());
 	if (normDirection > vitesseMax) {
 		float rapport = vitesseMax / normDirection;
-		direction.x *= rapport;
-		direction.y *= rapport;
-		direction.z *= rapport;
+		direction = direction *rapport;
 	}
-	M.x += direction.x;
-	M.y += direction.y;
-	M.z += direction.z;
+	M = M + direction;
 	V = computeVfromM();
 // 	TRACE("M = " << M);
 // 	TRACE("V = " << V);
