@@ -151,7 +151,7 @@ namespace Toolbox
 		}
 	}
 
-	std::vector<int*> detecterCentres(unsigned char * pImage, int width, int height)
+	std::vector<Point> detecterCentres(unsigned char * pImage, int width, int height)
 	{
 		int lWidth =  width;
 		int lHeight = height;
@@ -169,15 +169,10 @@ namespace Toolbox
 		rgbToHsv(pVector, lWidth, lHeight);
 
 
-		std::vector<int*> listeCentres;
+		std::vector<Point> listeCentres;
 		for (int nbC = 0; nbC < (nbCentresOrangesCherches + nbCentresBleusCherches); nbC++) {
-				int* coord = new int[3];
-				coord[0] = lWidth - 1;
-				coord[1] = lHeight - 1;
-				coord[2] = 0;
-				listeCentres.push_back(coord);
+			listeCentres.push_back(Point(lWidth - 1, lHeight - 1, 0));
 		}
-
 
 		// Parcours des pixels de l'image
 		for (int i = 0; i < lHeight; i++)
@@ -231,8 +226,8 @@ namespace Toolbox
 						int rayonSecteur = 2*hauteur;
 						bool dejaTrouve = false;
 						for (int k = 0; k < listeCentres.size(); k++) {
-							if ( xCentre - rayonSecteur < listeCentres[k][0] && xCentre + rayonSecteur > listeCentres[k][0]
-							&& yCentre - rayonSecteur < listeCentres[k][1] && yCentre + rayonSecteur > listeCentres[k][1] )
+							if ( xCentre - rayonSecteur < listeCentres[k].x && xCentre + rayonSecteur > listeCentres[k].x
+							&& yCentre - rayonSecteur < listeCentres[k].y && yCentre + rayonSecteur > listeCentres[k].y )
 							{
 								dejaTrouve = true;
 								break;
@@ -242,11 +237,7 @@ namespace Toolbox
 						// Si le centre est bien un nouveau, on l'ajoute à la liste
 						if (!dejaTrouve)
 						{
-							int* coord;
-							coord = new int[3];
-							coord[0] = xCentre;
-							coord[1] = yCentre;
-							coord[2] = 0;
+							Point coord(xCentre, yCentre, 0);
 							if (mID == ORANGE && nbCentresOrangesTrouves < nbCentresOrangesCherches) {
 								listeCentres[nbCentresOrangesTrouves] = coord;
 								nbCentresOrangesTrouves++;
@@ -280,11 +271,11 @@ namespace Toolbox
 			// Si tous les marqueurs n'ont pas été trouvés, on rajoute des éléments pour que le vecteur soit bien de taille nbCentresCherches (les coords st alors en bas à droite)
 			delete pVector;
 			for (int ajout = 0; ajout < nbCentresCherches - nbCentresTrouves; ajout++) {
-				int* coord;
+				Point coord;
 				coord = new int[3];
-				coord[0] = lWidth - 1;
-				coord[1] = lHeight - 1;
-				coord[2] = 0;
+				coord.x = lWidth - 1;
+				coord.y = lHeight - 1;
+				coord.z = 0;
 				listeCentres.push_back(coord);
 				}
 			return listeCentres;
@@ -293,7 +284,7 @@ namespace Toolbox
 	}
 
 
-	void placerMarqueurs(unsigned char * image, std::vector<int*> centres, int width, int height)
+	void placerMarqueurs(unsigned char * image, std::vector<Point> centres, int width, int height)
 	{
 		int lWidth =  width;
 		int lHeight = height;
@@ -302,8 +293,8 @@ namespace Toolbox
 
 		for (unsigned int centre = 0; centre < centres.size(); centre++) 
 		{
-			int x = centres[centre][0];
-			int y = centres[centre][1];
+			int x = centres[centre].x;
+			int y = centres[centre].y;
 
 			for (int dx = -largMarque; dx < largMarque+1; dx++) {
 				for (int dy = -largMarque; dy < largMarque+1; dy++) {
@@ -329,31 +320,28 @@ namespace Toolbox
 	}
 
 
-	void remplirProfondeur(unsigned short * depth, std::vector<int*> centres, int width, int height)
+	void remplirProfondeur(unsigned short * depth, std::vector<Point> centres, int width, int height)
 	{
 		int lWidth =  width;
 		int lHeight = height;
 		for (unsigned int centre = 0; centre < centres.size(); centre++) 
 		{
-			int x = centres[centre][0];
-			int y = centres[centre][1];
-			centres[centre][2] = depth[y*lWidth + x];
+			int x = centres[centre].x;
+			int y = centres[centre].y;
+			centres[centre].z = depth[y*lWidth + x];
 			/*if (centre == 0) {
 				cout << "profondeur de centre[" << centre << "] = " << centres[centre][2] << endl; 
 			}*/
 		}
 	}
 
-	void reglerBras(std::vector<int*> centres, int width, int height)
+	void followLeftConvention(std::vector<Point> centres)
 	{
-		if (centres.size() > 1) {
-			if (centres[0][0] > centres[1][0]) {
-				int xAux = centres[0][0];
-				int yAux = centres[0][1];
-				centres[0][0] = centres[1][0];
-				centres[0][1] = centres[1][1];
-				centres[1][0] = xAux;
-				centres[1][1] = yAux;
+		if (centres.size() > 1) { // TODO: not safe for size > 2
+			if (centres[0].x > centres[1].x) {
+				Point aux(centres[0]);
+				centres[0] = centres[1];
+				centres[1] = aux;
 			}
 		}
 	}

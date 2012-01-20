@@ -794,7 +794,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 	const MapMetaData* pImageMD;
 	XnUInt8* pImage = NULL;
-	std::vector<int*> centres;
+	std::vector<Point> centres;
 
 	if (isImageOn())
 	{
@@ -813,7 +813,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 		// Détection des centres des marqueurs
 		centres = Toolbox::detecterCentres(pImage, pImageMD->XRes(), pImageMD->YRes());
 		// Différenciation du bras et de la main
-		Toolbox::reglerBras(centres, pImageMD->XRes(), pImageMD->YRes());
+		Toolbox::followLeftConvention(centres);
 		// Marquage des centres sur l'image (en carrés de couleurs)
 		Toolbox::placerMarqueurs(pImage, centres, pImageMD->XRes(), pImageMD->YRes());
 	}
@@ -838,21 +838,21 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 
 	// Déplacement en temps-réel du modèle 3D
-	std::cout << "Profondeur = " << centres[0][2] << std::endl;
+	std::cout << "Profondeur = " << centres[0].z << std::endl;
 
 	bool absurdeAvtArr = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
-	if ((centres[0][0] == pImageMD->XRes()-1 && centres[0][1] == pImageMD->YRes()-1) || (centres[1][0] == pImageMD->XRes()-1 && centres[1][1] == pImageMD->YRes()-1)) {
+	if ((centres[0].x == pImageMD->XRes()-1 && centres[0].y == pImageMD->YRes()-1) || (centres[1].x == pImageMD->XRes()-1 && centres[1].y == pImageMD->YRes()-1)) {
 		absurdeAvtArr = true;
 	}
 	bool absurdeGcheDte = false;   // Vaut vrai quand la variation des positions (déplacement gauche-droite) de centre est trop importante
-	if (centres[0][2] == 0 || centres[1][2] == 0) {
+	if (centres[0].z == 0 || centres[1].z == 0) {
 		absurdeGcheDte = true;
 	}
 	if (!absurdeAvtArr && !absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1][0] - centres[0][0], centres[0][2] - centres[1][2], centres[0][1] - centres[1][1]);
+		Digger::setPosDiggerScaled(centres[1].x - centres[0].x, centres[0].z - centres[1].z, centres[0].y - centres[1].y);
 	}
 	if (!absurdeAvtArr && absurdeGcheDte) {
-		Digger::setPosDiggerScaled(centres[1][0] - centres[0][0], 0, centres[0][1] - centres[1][1]);
+		Digger::setPosDiggerScaled(centres[1].x - centres[0].x, 0, centres[0].y - centres[1].y);
 	}
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)

@@ -81,7 +81,6 @@ int		totalFrames	= 0;
 Point computeVfromM();
 // Global point variables
 Point O, M(6, 0, 1), V(computeVfromM());
-// Point O, M(6, 0, 0), V(computeVfromM());
 
 
 /*** Model-related functions ***/
