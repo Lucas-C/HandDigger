@@ -836,7 +836,22 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	// Remplissage des valeurs de profondeur dans la liste de centres
 	Toolbox::remplirProfondeur(pImageDepth, centres, pDepthMetaData->XRes(), pDepthMetaData->YRes());
 
-	if (centres.size() == 2) {
+
+	// Déplacement en temps-réel du modèle 3D
+	std::cout << "Profondeur = " << centres[0][2] << std::endl;
+
+	bool absurdeAvtArr = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
+	if ((centres[0][0] == pImageMD->XRes()-1 && centres[0][1] == pImageMD->YRes()-1) || (centres[1][0] == pImageMD->XRes()-1 && centres[1][1] == pImageMD->YRes()-1)) {
+		absurdeAvtArr = true;
+	}
+	bool absurdeGcheDte = false;   // Vaut vrai quand la variation des positions (déplacement gauche-droite) de centre est trop importante
+	if (centres[0][2] == 0 || centres[1][2] == 0) {
+		absurdeGcheDte = true;
+	}
+	if (!absurdeAvtArr && !absurdeGcheDte) {
+		Digger::setPosDigger(centres[1][0] - centres[0][0], centres[0][2] - centres[1][2], centres[0][1] - centres[1][1]);
+	}
+	if (!absurdeAvtArr && absurdeGcheDte) {
 		Digger::setPosDigger(centres[1][0] - centres[0][0], 0, centres[0][1] - centres[1][1]);
 	}
 
