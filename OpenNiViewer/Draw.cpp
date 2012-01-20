@@ -34,6 +34,7 @@
 #include "Keyboard.h"
 #include "Capture.h"
 #include "Toolbox.h"
+#include "Macros.hpp"
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
 	#include <GLUT/glut.h>
 	#include <OpenGL/gl.h>
@@ -528,7 +529,7 @@ void drawInit()
 
 	CreateRainbowPallet();
 
-	setPreset(13);
+	setPreset(14);
 
 	TextureMapInit(&g_texBackground, 1024, 1024, 3, 1024, 1024);
 
@@ -834,6 +835,10 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	XnDepthPixel* pImageDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
 	// Remplissage des valeurs de profondeur dans la liste de centres
 	Toolbox::remplirProfondeur(pImageDepth, centres, pDepthMetaData->XRes(), pDepthMetaData->YRes());
+
+	if (centres.size() == 2) {
+		Digger::setPosDigger(centres[1][0] - centres[0][0], 0, centres[0][1] - centres[1][1]);
+	}
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
 	{

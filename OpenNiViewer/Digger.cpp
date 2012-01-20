@@ -52,7 +52,7 @@ namespace Digger
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
 			diggerHandHeight	= 0.5, // Distance from M to ground
-			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength);
+			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5;
 
 // Aesthetic ones
 const float	jointRadius	= 0.3f,
@@ -60,7 +60,8 @@ const float	jointRadius	= 0.3f,
 			armRadius	= 0.2f;
 
 /*** Interface parameters ***/
-const float	arrowStep = 0.1f;
+const double	scaleFactor	= 40,
+				arrowStep	= 0.1 * scaleFactor;
 
 // Camera parameters
 int		nw			= 0,
@@ -499,9 +500,13 @@ void arrowKeyCallback(int key, int x, int y)
 
 void setPosDigger(double x, double y, double z)
 {
+	x /= scaleFactor;
+	y /= scaleFactor;
+	z /= scaleFactor;
 	const double dist = x * x + y * y + z * z;
+	TRACE_("x = " << x << " | y = " << y << " | z = " << z);
 	if (x > 0
-	&&	z > 0
+//	&&	z > diggerHandHeight
 	&&	dist < distMaxSquared) {
 		const double	oldMX = M.x,
 						oldMY = M.y,
@@ -513,7 +518,7 @@ void setPosDigger(double x, double y, double z)
 		M.y = y;
 		M.z = z;
 		V = computeVfromM();
-		if (V.x < 0 || V.z < 0) {
+		if (V.x < 0) {
 			M.x = oldMX;
 			M.y = oldMY;
 			M.z = oldMZ;
