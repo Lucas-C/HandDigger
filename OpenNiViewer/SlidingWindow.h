@@ -16,7 +16,9 @@ private:
 	std::deque<T> memory_;
 
 public:
-	SlidingWindowMean(int windowSize = 15) : mean_(), windowSize_(windowSize), memory_() {}
+	SlidingWindowMean(int windowSize = 15) : mean_(), windowSize_(windowSize), memory_() {
+		memory_.reserve(windowSize_);
+	}
 
 	void push(const T& value) {
 		const unsigned int memSize = memory_.size();
@@ -58,7 +60,7 @@ private:
 	T mean_;
 
 public:
-	SlidingWindowNone() : mean_(0) {}
+	SlidingWindowNone() : mean_() {}
 
 	void push(const T& value) {
 		mean_ = value;

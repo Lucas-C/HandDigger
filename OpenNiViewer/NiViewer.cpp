@@ -640,7 +640,6 @@ int main(int argc, char **argv)
 	glutSetCursor(GLUT_CURSOR_NONE);
 
 	init_opengl();
-	Digger::init();	// @@@dded
 
 	glut_helpers_initialize();
 
@@ -666,7 +665,8 @@ int main(int argc, char **argv)
 	glut_add_interactor(&light);
 	glut_add_interactor(&object);
 
-	// @@@dded
+	// @@@dded block
+	Digger::init();
 	digger.mouse_function = Digger::mouseCallback;
 	digger.motion_function = Digger::motionCallback;
 	digger.keyboard_function = Digger::keyboardCallback;
@@ -688,7 +688,7 @@ int main(int argc, char **argv)
 	createMenu();
 
 	atexit(onExit);
-	
+
 	// Per frame code is in display
 	glutMainLoop();
 
