@@ -335,7 +335,7 @@ namespace Toolbox
 		}
 	}
 
-	void followLeftConvention(std::vector<Point> centres)
+	void followLeftConvention(std::vector<Point>& centres)
 	{
 		if (centres.size() > 1) { // TODO: not safe for size > 2
 			if (centres[0].x > centres[1].x) {

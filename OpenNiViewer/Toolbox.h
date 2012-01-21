@@ -26,7 +26,7 @@ namespace Toolbox {
 	void remplirProfondeur(unsigned short * depth, std::vector<Point> centres, int width, int height);
 
 	// Va placer régler centre[0] et centre[1] (convention : le centre le plus à gauche est l'extrémité du bras)
-	void followLeftConvention(std::vector<Point> centres);
+	void followLeftConvention(std::vector<Point>& centres);
 };
 
 #endif //DEF_H_TOOLBOX_

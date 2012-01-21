@@ -58,7 +58,7 @@ private:
 	T mean_;
 
 public:
-	SlidingWindowNone() : mean_(0) {}
+	SlidingWindowNone() : mean_() {}
 
 	void push(const T& value) {
 		mean_ = value;

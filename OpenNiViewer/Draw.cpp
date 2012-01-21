@@ -844,8 +844,6 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 
 	// Déplacement en temps-réel du modèle 3D
-	std::cout << "Profondeur = " << centres[0].z << std::endl;
-
 	bool absurdeAvtArr = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
 	if ((centres[0].x == pImageMD->XRes()-1 && centres[0].y == pImageMD->YRes()-1) || (centres[1].x == pImageMD->XRes()-1 && centres[1].y == pImageMD->YRes()-1)) {
 		absurdeAvtArr = true;
@@ -862,7 +860,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	if (!absurdeAvtArr) {
 		if (absurdeGcheDte)
 			goal.y = 0;
-		Digger::setPosDigger(goal);
+		Digger::setGoalDigger(goal);
 	}
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
