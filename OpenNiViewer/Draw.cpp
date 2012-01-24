@@ -54,9 +54,10 @@
 #endif
 
 
+#define USE_CENTERS_DETECTION
 #define USE_SLIDING_WINDOW_NONE
-#include "Point.h"
 #include "SlidingWindow.h"
+#include "Point.h"
 SlidingWindow<Point> meanGoal;
 
 // --------------------------------
@@ -800,33 +801,34 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 	const MapMetaData* pImageMD;
 	XnUInt8* pImage = NULL;
-	std::vector<Point> centres;
+	std::vector<Point> centres;	//	@@@dded
 
 	if (isImageOn())
 	{
 		pImageMD = getImageMetaData();
-		//pImage = const_cast<XnUInt8*>(getImageMetaData()->Data());
-		MapMetaData* pImageMD2 = const_cast<MapMetaData*>(pImageMD);
-		pImage = pImageMD2->WritableData();             // RAAAAAAAAAAAHHHHH !
+#ifndef USE_CENTERS_DETECTION
+		pImage = (XnUInt8*)pImageMD->Data();
+#else
+		pImage = const_cast<MapMetaData*>(pImageMD)->WritableData();
 		if (pImage == NULL) {
-			std::cout << "pImage est nul" << std::endl;
+			std::cerr << "pImage == NULL" << std::endl;
+		} else {
+			// Affichage de l'image en HSV (pour détecter les couleurs de marqueurs pertinentes) ------------------------------
+			//Toolbox::rgbToHsv(pImage, pImageMD->XRes(), pImageMD->YRes());
+			// Processus de détection de marqueurs --------------------------------------
+			// Détection des centres des marqueurs
+			centres = Toolbox::detecterCentres(pImage, pImageMD->XRes(), pImageMD->YRes());
+			// Différenciation du bras et de la main
+			Toolbox::followLeftConvention(centres);
+			// Marquage des centres sur l'image (en carrés de couleurs)
+			Toolbox::placerMarqueurs(pImage, centres, pImageMD->XRes(), pImageMD->YRes());
 		}
-
-		// Affichage de l'image en HSV (pour détecter les couleurs de marqueurs pertinentes) ------------------------------
-		//Toolbox::rgbToHsv(pImage, pImageMD->XRes(), pImageMD->YRes());
-
-		// Processus de détection de marqueurs --------------------------------------
-		// Détection des centres des marqueurs
-		centres = Toolbox::detecterCentres(pImage, pImageMD->XRes(), pImageMD->YRes());
-		// Différenciation du bras et de la main
-		Toolbox::followLeftConvention(centres);
-		// Marquage des centres sur l'image (en carrés de couleurs)
-		Toolbox::placerMarqueurs(pImage, centres, pImageMD->XRes(), pImageMD->YRes());
+#endif
 	}
 	else if (isIROn())
 	{
 		pImageMD = getIRMetaData();
-		pImage = const_cast<XnUInt8*>((const XnUInt8*)getIRMetaData()->Data());
+		pImage = (XnUInt8*)getIRMetaData()->Data();
 	}
 	else
 		return;
@@ -837,11 +839,12 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	}
 
 	const DepthMetaData* pDepthMetaData = getDepthMetaData();
+
+#ifdef USE_CENTERS_DETECTION
 	// Récupération de la carte de profondeur
 	XnDepthPixel* pImageDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
 	// Remplissage des valeurs de profondeur dans la liste de centres
 	Toolbox::remplirProfondeur(pImageDepth, centres, pDepthMetaData->XRes(), pDepthMetaData->YRes());
-
 
 	// Déplacement en temps-réel du modèle 3D
 	bool absurdeAvtArr = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
@@ -860,8 +863,11 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	if (!absurdeAvtArr) {
 		if (absurdeGcheDte)
 			goal.y = 0;
-		Digger::setGoalDigger(goal);
+
+		Digger::setGoalDigger(goal * (1.0 / 40));
+
 	}
+#endif
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
 	{

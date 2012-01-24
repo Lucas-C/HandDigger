@@ -454,21 +454,27 @@ void keyboardCallback(unsigned char key, int, int)
 			break;
 		case 100: // Left arrow
 			setPosDigger(M + Point(0, arrowStep, 0));
+			goal = M;
 			break;
 		case 101: // Up arrow
 			setPosDigger(M + Point(arrowStep, 0, 0));
+			goal = M;
 			break;
 		case 102: // Right arrow
 			setPosDigger(M + Point(0, -arrowStep, 0));
+			goal = M;
 			break;
 		case 103: // Down arrow
 			setPosDigger(M + Point(-arrowStep, 0, 0));
+			goal = M;
 			break;
 		case 104: // PageUp
 			setPosDigger(M + Point(0, 0, arrowStep));
+			goal = M;
 			break;
 		case 105: // PageDown
 			setPosDigger(M + Point(0, 0, -arrowStep));
+			goal = M;
 			break;
 		default:
 			TRACE("Key (" << (int)key << ") not handled.");
@@ -483,42 +489,44 @@ void arrowKeyCallback(int key, int x, int y)
 
 void setPosDigger(const Point& pos)
 {
-	TRACE_(pos);
+	//TRACE_("Pcandidate = " << pos);
 	if (pos.x > 0
 	&&	pos.squareNorm() < distMaxSquared) {
 		Point	oldM = M,
 				oldV = V;
-		goal = M = pos;
+		M = pos;
 		V = computeVfromM();
+ 		//TRACE("M = " << M);
+ 		//TRACE("V = " << V);
+ 		//testComputation();
 		if (V.x < 0) {
-			goal = M = oldM;
+			M = oldM;
 			V = oldV;
+		} else {
+			TRACE_("\t pos = " << M);
 		}
 	}
 }
 
 void setGoalDigger(const Point& g)
 {
-	TRACE_(g);
+	//TRACE_("gCandidate = " << g);
 	if (g.x > 0
 	&&	g.squareNorm() < distMaxSquared) {
 		goal = g;
+		TRACE_("\t goal = " << goal);
 	}
 }
 
 void updatePosDigger()
 {
-	Point direction(goal.x - M.x, goal.y - M.y, goal.z - M.z);
+	Point direction(goal - M);
 	float normDirection = sqrt(direction.squareNorm());
 	if (normDirection > vitesseMax) {
 		float rapport = vitesseMax / normDirection;
-		direction = direction *rapport;
+		direction = direction * rapport;
 	}
-	M = M + direction;
-	V = computeVfromM();
-// 	TRACE("M = " << M);
-// 	TRACE("V = " << V);
-// 	testComputation();
+	setPosDigger(M + direction);
 }
 
 }

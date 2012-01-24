@@ -337,27 +337,27 @@ void toggleStream(Generator& generator, XnProductionNodeType type, bool* bIsOn)
 	*bIsOn = (generator.IsGenerating() == TRUE);
 }
 
-void toggleDepthState(int nDummy)
+void toggleDepthState(int)
 {
 	toggleStream(g_Depth, XN_NODE_TYPE_DEPTH, &g_bIsDepthOn);
 }
 
-void toggleImageState(int nDummy)
+void toggleImageState(int)
 {
 	toggleStream(g_Image, XN_NODE_TYPE_IMAGE, &g_bIsImageOn);
 }
 
-void toggleIRState(int nDummy)
+void toggleIRState(int)
 {
 	toggleStream(g_IR, XN_NODE_TYPE_IR, &g_bIsIROn);
 }
 
-void toggleAudioState(int nDummy)
+void toggleAudioState(int)
 {
 	toggleStream(g_Audio, XN_NODE_TYPE_AUDIO, &g_bIsAudioOn);
 }
 
-void toggleMirror(int nDummy)
+void toggleMirror(int)
 {
 	XnStatus nRetVal = g_Context.SetGlobalMirror(!g_Context.GetGlobalMirror());
 	if (nRetVal != XN_STATUS_OK)
