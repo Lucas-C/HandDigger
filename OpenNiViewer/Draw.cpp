@@ -880,6 +880,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	Toolbox::remplirProfondeur(pImageDepth, centres, pDepthMetaData->XRes(), pDepthMetaData->YRes());
 
 	// Déplacement en temps-réel du modèle 3D
+	// Déplacement du bras
 	bool absurdeAvtArr = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
 	if ((centres[0].x == pImageMD->XRes()-1 && centres[0].y == pImageMD->YRes()-1) || (centres[1].x == pImageMD->XRes()-1 && centres[1].y == pImageMD->YRes()-1)) {
 		absurdeAvtArr = true;
@@ -888,7 +889,6 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	if (centres[0].z == 0 || centres[1].z == 0) {
 		absurdeGcheDte = true;
 	}
-
 	Point p(centres[0] - centres[1]), goal(-p.x, p.z, p.y);
 	meanGoal.push(goal);
 	goal = meanGoal.mean();
@@ -898,6 +898,9 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 			goal.y = 0;
 		Digger::setGoalDigger(goal * (1.0 / 40));
 	}
+	// Déplacement du godet
+	float angleGodet = Toolbox::calculAngle(centres[2], centres[3]);
+
 #endif
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)

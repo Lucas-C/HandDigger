@@ -6,9 +6,11 @@ class Point;
 namespace Digger
 {
 	void init();
+	void draw(bool inCorner);
+
 	void setPosDigger(const Point& pos);
 	void setGoalDigger(const Point& g);
-	void draw(bool inCorner);
+	void setGlobalShovelAngle(double theta); // "world" angle
 
 	void mouseCallback(int, int, int, int);
 	void motionCallback(int, int);
