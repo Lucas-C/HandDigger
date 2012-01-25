@@ -49,16 +49,17 @@ namespace Digger
 
 /*** Model parameters ***/
 
-const float	upperArmLength		= 5,
-			lowerArmLength		= 5,
-			diggerHandHeight	= 0.5, // Distance from M to ground
-			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
-			vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
+const double	upperArmLength		= 5,
+				lowerArmLength		= 5,
+				diggerHandRadius	= 0.5,
+				diggerHandWidth		= 1.5,
+				distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
+				vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
 
 // Aesthetic ones
-const float	jointRadius	= 0.3f,
-			cabinSize	= 3,
-			armRadius	= 0.2f;
+const double	jointRadius	= 0.3f,
+				cabinSize	= 3,
+				armRadius	= 0.2f;
 
 /*** Interface parameters ***/
 const double arrowStep	= 0.1;
@@ -68,13 +69,13 @@ int		nw			= 0,
 		nh			= 0;
 int		oldX		= 0,
 		oldY		= 0;
-float	rX			= 15,
-		rY			= -60;
-float	dist		= -10;
+double	rX			= 15,
+		rY			= -60,
+		dist		= -10;
 bool	zoomMode	= false;
 
 // FPS calcul parameters
-float	fps			= 0;
+double	fps			= 0;
 int		startTime	= 0;
 int		totalFrames	= 0;
 
@@ -82,14 +83,15 @@ int		totalFrames	= 0;
 Point computeVfromM();
 // Global point variables
 Point O, goal(6, 0, 1), V(computeVfromM()), M(goal);
+double shovelAngle = 0; // Shovel inclinaison
 
 
 /*** Model-related functions ***/
 
 // Utility function giving in order solutions of a 2nd degree polynom
-void sol2ndDegree(float a, float b, float c, float& sMin, float& sMax) {
+void sol2ndDegree(double a, double b, double c, double& sMin, double& sMax) {
 	bool aIsNull = F_EQUAL(a, 0);
-	float delta = b * b - 4 * a *c;
+	double delta = b * b - 4 * a *c;
 	if (delta < 0 || (aIsNull && F_EQUAL(b, 0))) {
 		TRACE_("ERROR: no solution in \'sol2ndDegree\' with"
 		<< "\n a = " << a
@@ -100,8 +102,8 @@ void sol2ndDegree(float a, float b, float c, float& sMin, float& sMax) {
 	if (aIsNull) {
 		sMin = sMax = c / b;
 	} else {
-		sMin = (-b - static_cast<float>(sqrt(delta))) / 2 / a;
-		sMax = (-b + static_cast<float>(sqrt(delta))) / 2 / a;
+		sMin = (-b - sqrt(delta)) / 2 / a;
+		sMax = (-b + sqrt(delta)) / 2 / a;
 	}
 }
 
@@ -130,34 +132,34 @@ Point computeVfromM() {
 	=> (1 + Z²/Y²) * z² - 2AZ/Y² * z + A² / Y² - upperArmLength² = 0
 
 */
-	float	X2 = M.x * M.x,
+	double	X2 = M.x * M.x,
 			Y2 = M.y * M.y;
 
 	if (F_EQUAL(M.z, 0)) {
-		return Point(M.x / 2, M.y / 2, static_cast<float>(sqrt(
-			upperArmLength * upperArmLength - X2 / 4 - Y2 / 4)));
+		return Point(M.x / 2, M.y / 2,
+			sqrt(upperArmLength * upperArmLength - X2 / 4 - Y2 / 4));
 	}
 
-	float	Z2 = M.z * M.z,
+	double	Z2 = M.z * M.z,
 			A = (X2 + Y2 + Z2 + upperArmLength * upperArmLength - lowerArmLength * lowerArmLength) / 2;
 
 	if (F_EQUAL(M.x, 0)) {
-		float dumb = 0, z = 0;
+		double dumb = 0, z = 0;
 		sol2ndDegree(1 + Z2 / Y2, -2 * A * M.z / Y2, A * A / Y2 - upperArmLength * upperArmLength, dumb, z);
 		return Point(0, (A - z * M.z) / M.y, z);
 	} else if (F_EQUAL(M.y, 0)) {
-		float dumb = 0, z = 0;
+		double dumb = 0, z = 0;
 		sol2ndDegree(1 + Z2 / X2, -2 * A * M.z / X2, A * A / X2 - upperArmLength * upperArmLength, dumb, z);
 		return Point((A - z * M.z) / M.x, 0, z);
 	}
 
-	float x1 = 0, x2 = 0;
+	double x1 = 0, x2 = 0;
 	sol2ndDegree(	1 + Y2 / X2 + (M.x + Y2 / M.x) * (M.x + Y2 / M.x) / Z2,
 					-2 * A * (M.x + Y2 / M.x) / Z2,
 					A * A / Z2 - upperArmLength * upperArmLength,
 					x1, x2);
 
-	float	z1 = (A - x1 * M.x - x1 * Y2 / M.x) / M.z,
+	double	z1 = (A - x1 * M.x - x1 * Y2 / M.x) / M.z,
 			z2 = (A - x2 * M.x - x2 * Y2 / M.x) / M.z;
 
 	if (z1 > z2)
@@ -178,7 +180,7 @@ void testComputation() {
 	TRACE("Xy = Yx");
 	TRACE("-> " << M.x * V.y << " = " << M.y * V.x);
 
-	float	X2 = M.x * M.x,
+	double	X2 = M.x * M.x,
 			Y2 = M.y * M.y,
 			Z2 = M.z * M.z,
 			A = (X2 + Y2 + Z2 + upperArmLength * upperArmLength - lowerArmLength * lowerArmLength) / 2,
@@ -237,7 +239,7 @@ void drawVec(double x, double y, double z)
 		if (z > -0.9999)
 			phi = 2 * atan(x / (1 + z)) * 180 / M_PI;
 		double theta = acos(-y) * 180 / M_PI;
-		glColor3f(1,1,0);
+		glColor3d(1,1,0);
 		glRotated(180 + phi,0,1,0);
 		glRotated(90 + theta,1,0,0);
 		glPushMatrix();
@@ -252,7 +254,7 @@ void drawAxes()
 	//this push matrix call stores the current matrix state
 	//and restores it once we are done with the arrow rendering
 	glPushMatrix();
-		glColor3f(0,0,1);
+		glColor3d(0,0,1);
 		glPushMatrix();
 			glTranslatef(0,0, 0.8f);
 			glutSolidCone(0.0325,0.2, 4,1);
@@ -262,7 +264,7 @@ void drawAxes()
 		glPopMatrix();
 		glutSolidCone(0.0225,1, 4,1);
 
-		glColor3f(1,0,0);
+		glColor3d(1,0,0);
 		glRotatef(90,0,1,0);
 		glPushMatrix();
 			glTranslatef(0,0,0.8f);
@@ -273,7 +275,7 @@ void drawAxes()
 		glPopMatrix();
 		glutSolidCone(0.0225,1, 4,1);
 
-		glColor3f(0,1,0);
+		glColor3d(0,1,0);
 		glRotatef(90,-1,0,0);
 		glPushMatrix();
 			glTranslatef(0,0, 0.8f);
@@ -289,52 +291,90 @@ void drawAxes()
 void drawXYGrid(int gridSize)
 {
 	glBegin(GL_LINES);
-	glColor3f(0.75f, 0.75f, 0.75f);
+	glColor3d(0.75f, 0.75f, 0.75f);
 	for(int i = -gridSize; i <= gridSize; ++i) {
-		glVertex3f((float)i, (float)-gridSize, 0);
-		glVertex3f((float)i, (float)gridSize, 0);
+		glVertex3d(i, -gridSize, 0);
+		glVertex3d(i, gridSize, 0);
 
-		glVertex3f((float)-gridSize, (float)i, 0);
-		glVertex3f((float)gridSize, (float)i, 0);
+		glVertex3d(-gridSize, i, 0);
+		glVertex3d(gridSize, i, 0);
 	}
 	glEnd();
 }
 
 void drawCabin() {
-	glColor3f(0.75f, 0.75f, 0.75f);
+	glColor3d(0.75f, 0.75f, 0.75f);
 	glPushMatrix();
 		glTranslatef(-jointRadius - cabinSize / 2, 0, 0);
 		glutSolidCube(cabinSize);
 	glPopMatrix();
 }
 
-void drawJoint(Point p)
+void drawJoint(const Point& p)
 {
-	glColor3f(1.f, 0.f, 0.f);
+	glColor3d(1.f, 0.f, 0.f);
 	glPushMatrix();
 		glTranslatef(p.x, p.y, p.z);
 		glutWireSphere(jointRadius, 8, 8);
 	glPopMatrix();
 }
 
-void drawArm(Point p1, Point p2)
+void drawArm(const Point& p1, const Point& p2)
 {
-	glColor3f(1.f, 0.5, 0.25);
-	float	vX = p2.x - p1.x,
-			vY = p2.y - p1.y,
-			vZ = p2.z - p1.z,
-			flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
-			norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ)),
-			shift = jointRadius / norm;
+	glColor3d(1.f, 0.5, 0.25);
+	const double	vX = p2.x - p1.x,
+					vY = p2.y - p1.y,
+					vZ = p2.z - p1.z,
+					flatNorm = sqrt(vX * vX + vY * vY),
+					norm = sqrt(vX * vX + vY * vY + vZ * vZ),
+					shift = jointRadius / norm;
 	glPushMatrix();
 		glTranslatef(p1.x + vX * shift, p1.y + vY * shift, p1.z + vZ * shift);
 		// We use spherical coordinates
 		if (vY >= 0)
-			glRotatef(static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
+			glRotatef(acos(vX / flatNorm) / M_PI * 180, 0, 0, 1);
 		else
-			glRotatef(-static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
-		glRotatef(static_cast<float>(acos(vZ / norm) / M_PI) * 180, 0, 1, 0);
+			glRotatef(-acos(vX / flatNorm) / M_PI * 180, 0, 0, 1);
+		glRotatef(acos(vZ / norm) / M_PI * 180, 0, 1, 0);
 		glutSolidCylinder(armRadius, norm - 2 * jointRadius, 30, 8);
+	glPopMatrix();
+}
+
+void drawShovel(const Point& p, double theta)
+{
+	const double	numMajor = 12,
+					numMinor = 12,
+					majorStep = diggerHandWidth / numMajor,
+					minorStep = M_PI / numMinor,
+					flatNorm = sqrt(p.x * p.x + p.y * p.y),
+					shiftCoeff = 1 + (jointRadius + diggerHandRadius) / flatNorm;
+	glColor3d(0.f, 0.7f, 0.f);
+	glPushMatrix();
+		glTranslatef(p.x * shiftCoeff, p.y * shiftCoeff, p.z);
+		// We use spherical coordinates
+		if (p.y >= 0)
+			glRotatef(acos(p.x / flatNorm) / M_PI * 180, 0, 0, 1);
+		else
+			glRotatef(-acos(p.x / flatNorm) / M_PI * 180, 0, 0, 1);
+		glRotatef(90, 0, 1, 0);
+		for (int i = 0; i < numMajor; ++i) {
+			GLdouble y0 = 0.5 * diggerHandWidth - i * majorStep;
+			GLdouble y1 = y0 - majorStep;
+			glBegin(GL_TRIANGLE_STRIP);
+			for (int j = 0; j <= numMinor; ++j) {
+				double a = j * minorStep + M_PI / 2 + theta;
+				GLdouble x = diggerHandRadius * cos(a);
+				GLdouble z = diggerHandRadius * sin(a);
+				glNormal3d(x / diggerHandRadius, 0.0, z / diggerHandRadius);
+				glTexCoord2d(j / (GLdouble) numMinor, i / (GLdouble) numMajor);
+				glVertex3d(x, y0, z);
+
+				glNormal3f(x / diggerHandRadius, 0.0, z / diggerHandRadius);
+				glTexCoord2d(j / (GLdouble) numMinor, (i + 1) / (GLdouble) numMajor);
+				glVertex3d(x, y1, z);
+			}
+			glEnd();
+		}
 	glPopMatrix();
 }
 
@@ -353,6 +393,7 @@ void renderModels()
 		drawJoint(V);
 		drawArm(V, M);
 		drawJoint(M);
+		drawShovel(M, shovelAngle);
 	glDisable(GL_LIGHTING);
 }
 
@@ -379,7 +420,7 @@ void draw(bool inCorner)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, (GLfloat)nw / (GLfloat)nh, 0.1f, 100.0f);
+	gluPerspective(60, (GLdouble)nw / (GLdouble)nh, 0.1f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 
 	glTranslatef(0,0,dist);
@@ -390,8 +431,8 @@ void draw(bool inCorner)
 	totalFrames++;
 	int current = glutGet(GLUT_ELAPSED_TIME);
 	if((current - startTime) > 1000) {
-		float elapsedTime = float(current-startTime);
-		fps = ((float)(totalFrames * 1000) / elapsedTime) ;
+		double elapsedTime = current - startTime;
+		fps = totalFrames * 1000.0 / elapsedTime;
 		startTime = current;
 		totalFrames=0;
 	}
@@ -403,7 +444,7 @@ void draw(bool inCorner)
 
 	//Show the fps
 	setOrthoForFont();
-	glColor3f(1,1,1);
+	glColor3d(1,1,1);
 	renderSpacedBitmapString(20, 20, 0, GLUT_BITMAP_HELVETICA_12, buffer);
 	resetPerspectiveProjection();
 
@@ -431,12 +472,12 @@ void mouseCallback(int button, int s, int x, int y)
 void motionCallback(int x, int y)
 {
 	if (zoomMode) {
-		dist *= (1 + (float)(y - oldY) / 60);
+		dist *= 1 + (y - oldY) / 60.0;
 	} else {
-		rX += (float)(x - oldX) / 5;
-		rY += (float)(y - oldY) / 5;
-// 		float theta = 45 - rY / 180 * M_PI;
-// 		float phi = -rX / 180 * M_PI;
+		rX += (x - oldX) / 5.0;
+		rY += (y - oldY) / 5.0;
+// 		double theta = 45 - rY / 180 * M_PI;
+// 		double phi = -rX / 180 * M_PI;
 // 		std::cout << "phi: " << phi << " | theta: " << theta << "\n";
 	}
 	oldX = x;
@@ -487,6 +528,11 @@ void arrowKeyCallback(int key, int x, int y)
 	keyboardCallback((unsigned char)key, x, y);
 }
 
+void setGlobalShovelAngle(double theta)
+{
+	shovelAngle = theta;
+}
+
 void setPosDigger(const Point& pos)
 {
 	//TRACE_("Pcandidate = " << pos);
@@ -521,9 +567,9 @@ void setGoalDigger(const Point& g)
 void updatePosDigger()
 {
 	Point direction(goal - M);
-	float normDirection = sqrt(direction.squareNorm());
+	double normDirection = sqrt(direction.squareNorm());
 	if (normDirection > vitesseMax) {
-		float rapport = vitesseMax / normDirection;
+		double rapport = vitesseMax / normDirection;
 		direction = direction * rapport;
 	}
 	setPosDigger(M + direction);

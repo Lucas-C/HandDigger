@@ -53,6 +53,8 @@
 // --------------------------------
 #include <XnCppWrapper.h>
 
+bool gIsCalibrating = 0;
+
 #if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
 	#define UNIX
 	#define GLX_GLXEXT_LEGACY
@@ -283,6 +285,11 @@ void startCapture(int delay)
 	}
 }
 
+void setCalibratingOn(int dummy)
+{
+	gIsCalibrating = true;
+}
+
 void createKeyboardMap()
 {
 	startKeyboardMap();
@@ -310,6 +317,7 @@ void createKeyboardMap()
 		{
 			registerKey('m', "Mirror on/off", toggleMirror, 0);
 			registerKey('/', "Reset all croppings", resetAllCropping, 0);
+			registerKey('n', "Calibration", setCalibratingOn, 0); 
 		}
 		endKeyboardGroup();
 		startKeyboardGroup(KEYBOARD_GROUP_CAPTURE);
