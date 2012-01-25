@@ -7,20 +7,20 @@ namespace Toolbox
 	bool surMarqueur(int redValue, int greenValue, int blueValue, MarqueurId &marqId)
 	{
 		// Pour l'instant, requiert que les valeurs rgb entrées soient celles de la représentation RGB
-		//if (redValue == 0 && greenValue > 80 && blueValue > 150 && marqId == VIDE) {      // Eclairé
-		if (redValue < 20 && greenValue > 130 && blueValue > 50 && marqId == VIDE) {       // Salle d'immersion
+		if (redValue == 0 && greenValue > 80 && blueValue > 150 && marqId == VIDE) {      // Eclairé
+		//if (redValue < 20 && greenValue > 130 && blueValue > 50 && marqId == VIDE) {       // Salle d'immersion
 			marqId = ORANGE;
 			return true;
-		//} else if (redValue > 150 && greenValue > 100 && blueValue > 50 && marqId == VIDE) {   // Eclairé
-		} else if (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100 && marqId == VIDE) {   // Salle d'immersion
+		} else if (redValue > 150 && greenValue > 100 && blueValue > 50 && marqId == VIDE) {   // Eclairé
+		//} else if (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100 && marqId == VIDE) {   // Salle d'immersion
 			marqId = BLEU;
 			return true;
 		} else if (marqId == ORANGE) {
-			//return (redValue == 0 && greenValue > 80 && blueValue > 150);   // Eclairé
-			return (redValue < 20 && greenValue > 130 && blueValue > 50);    // Salle d'immersion
+			return (redValue == 0 && greenValue > 80 && blueValue > 150);   // Eclairé
+			//return (redValue < 20 && greenValue > 130 && blueValue > 50);    // Salle d'immersion
 		} else if (marqId == BLEU) {
-			//return (redValue > 150 && greenValue > 100 && blueValue > 50);       // Eclairé
-			return (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100);    // Salle d'immersion
+			return (redValue > 150 && greenValue > 100 && blueValue > 50);       // Eclairé
+			//return (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100);    // Salle d'immersion
 		} else {
 			return false;
 		}
@@ -159,7 +159,7 @@ namespace Toolbox
 		int nbCentresOrangesTrouves = 0;
 		int nbCentresBleusTrouves = 0;
 		int nbCentresOrangesCherches = 2;
-		int nbCentresBleusCherches = 0;
+		int nbCentresBleusCherches = 2;
 
 		// On va travailler sur une copie de pImage (car il y aura des conversion HSV)
 		unsigned char * pVector = new unsigned char[width*height*lNbComp];
@@ -299,18 +299,22 @@ namespace Toolbox
 			for (int dx = -largMarque; dx < largMarque+1; dx++) {
 				for (int dy = -largMarque; dy < largMarque+1; dy++) {
 					if (x+dx >= 0 && x+dx < lWidth && y+dy >= 0 && y+dy < lHeight) {
-						if (centre == 0) {    // Extrémité du bras (vert)
+						if (centre == 0) {    // Base du bras (vert)
 							image[ lNbComp*((y+dy)*lWidth + x + dx) ] = (unsigned char) 0;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 1] = (unsigned char) 255;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 2] = (unsigned char) 0;
-						} else if (centre == 1) {    // Base du bras (bleu)
+						} else if (centre == 1) {    // Extrémité du bras (bleu)
 							image[ lNbComp*((y+dy)*lWidth + x + dx) ] = (unsigned char) 0;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 1] = (unsigned char) 0;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 2] = (unsigned char) 255;
-						} else if (centre == 2) {    // Point angulaire 1 (rouge)
+						} else if (centre == 2) {    // Point angulaire 1 du haut (rouge)
 							image[ lNbComp*((y+dy)*lWidth + x + dx) ] = (unsigned char) 255;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 1] = (unsigned char) 0;
 							image[ lNbComp*((y+dy)*lWidth + x + dx) + 2] = (unsigned char) 0;
+						} else if (centre == 3) {    // Point angulaire 2 du bas (gris)
+							image[ lNbComp*((y+dy)*lWidth + x + dx) ] = (unsigned char) 128;
+							image[ lNbComp*((y+dy)*lWidth + x + dx) + 1] = (unsigned char) 128;
+							image[ lNbComp*((y+dy)*lWidth + x + dx) + 2] = (unsigned char) 128;
 						}
 					}
 				}
@@ -343,7 +347,27 @@ namespace Toolbox
 				centres[0] = centres[1];
 				centres[1] = aux;
 			}
+			if (centres.size() > 3) {
+				if (centres[2].y < centres[3].y && centres[2].x > centres[3].x) {
+					Point aux2(centres[2]);
+					centres[2] = centres[3];
+					centres[3] = aux2;
+				}
+			}
 		}
+	}
+
+	float calculAngle(Point p1, Point p2)
+	{
+		Point segment(p2 - p1);
+		float segNorm = sqrt(segment.squareNorm());
+		segment = segment / segNorm;
+		Point axe(1.0, 0.0, 0.0);
+		float prodScal = acos(segment * axe);
+		if (segment.y < 0.0) {
+			prodScal = -prodScal;
+		}
+		return prodScal;
 	}
 
 

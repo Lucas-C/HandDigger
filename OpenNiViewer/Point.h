@@ -12,6 +12,8 @@ public:
 	Point() : x(0), y(0), z(0) {}
 	float squareNorm() const { return x * x + y * y + z * z; }
 	Point operator*(float f) { return Point(x * f, y * f, z * f); }
+	Point operator/(float f) { return Point(x / f, y / f, z / f); }
+	float operator*(const Point& p) { return x*p.x + y*p.y + z*p.z; }
 	Point operator+(const Point& p) { return Point(x + p.x, y + p.y, z + p.z); }
 	Point operator-(const Point& p) { return Point(x - p.x, y - p.y, z - p.z); }
 	std::ostream& operator>>(std::ostream &strm) const {
