@@ -51,7 +51,8 @@ namespace Digger
 
 const float	upperArmLength		= 5,
 			lowerArmLength		= 5,
-			diggerHandHeight	= 0.5, // Distance from M to ground
+			diggerHandRadius	= 0.5,
+			diggerHandWidth		= 1.5,
 			distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
 			vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
 
@@ -308,7 +309,7 @@ void drawCabin() {
 	glPopMatrix();
 }
 
-void drawJoint(Point p)
+void drawJoint(const Point& p)
 {
 	glColor3f(1.f, 0.f, 0.f);
 	glPushMatrix();
@@ -317,15 +318,15 @@ void drawJoint(Point p)
 	glPopMatrix();
 }
 
-void drawArm(Point p1, Point p2)
+void drawArm(const Point& p1, const Point& p2)
 {
 	glColor3f(1.f, 0.5, 0.25);
-	float	vX = p2.x - p1.x,
-			vY = p2.y - p1.y,
-			vZ = p2.z - p1.z,
-			flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
-			norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ)),
-			shift = jointRadius / norm;
+	const float	vX = p2.x - p1.x,
+				vY = p2.y - p1.y,
+				vZ = p2.z - p1.z,
+				flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
+				norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ)),
+				shift = jointRadius / norm;
 	glPushMatrix();
 		glTranslatef(p1.x + vX * shift, p1.y + vY * shift, p1.z + vZ * shift);
 		// We use spherical coordinates
@@ -335,6 +336,48 @@ void drawArm(Point p1, Point p2)
 			glRotatef(-static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
 		glRotatef(static_cast<float>(acos(vZ / norm) / M_PI) * 180, 0, 1, 0);
 		glutSolidCylinder(armRadius, norm - 2 * jointRadius, 30, 8);
+	glPopMatrix();
+}
+
+void drawShovel(const Point& p1, const Point& p2)
+{
+	const float	numMajor = 12,
+				numMinor = 12,
+				majorStep = diggerHandWidth / numMajor,
+				minorStep = M_PI / numMinor,
+				vX = p2.x - p1.x,
+				vY = p2.y - p1.y,
+				vZ = p2.z - p1.z,
+				flatNorm = static_cast<float>(sqrt(vX * vX + vY * vY)),
+				norm = static_cast<float>(sqrt(vX * vX + vY * vY + vZ * vZ)),
+				shift = (jointRadius + diggerHandRadius) / norm;
+	glColor3f(0.f, 1.f, 0.f);
+	glPushMatrix();
+		glTranslatef(p1.x + vX * shift, p1.y + vY * shift, p1.z + vZ * shift);
+		// We use spherical coordinates
+		if (vY >= 0)
+			glRotatef(static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
+		else
+			glRotatef(-static_cast<float>(acos(vX / flatNorm) / M_PI) * 180, 0, 0, 1);
+		glRotatef(static_cast<float>(acos(vZ / norm) / M_PI) * 180, 0, 1, 0);
+		for (int i = 0; i < numMajor; ++i) {
+			GLfloat y0 = 0.5 * diggerHandWidth - i * majorStep;
+			GLfloat y1 = y0 - majorStep;
+			glBegin(GL_TRIANGLE_STRIP);
+			for (int j = 0; j <= numMinor; ++j) {
+				double a = j * minorStep + M_PI / 2;
+				GLfloat x = diggerHandRadius * cos(a);
+				GLfloat z = diggerHandRadius * sin(a);
+				glNormal3f(x / diggerHandRadius, 0.0, z / diggerHandRadius);
+				glTexCoord2f(j / (GLfloat) numMinor, i / (GLfloat) numMajor);
+				glVertex3f(x, y0, z);
+
+				glNormal3f(x / diggerHandRadius, 0.0, z / diggerHandRadius);
+				glTexCoord2f(j / (GLfloat) numMinor, (i + 1) / (GLfloat) numMajor);
+				glVertex3f(x, y1, z);
+			}
+			glEnd();
+		}
 	glPopMatrix();
 }
 
@@ -353,6 +396,7 @@ void renderModels()
 		drawJoint(V);
 		drawArm(V, M);
 		drawJoint(M);
+		drawShovel(M, M * 1.1);
 	glDisable(GL_LIGHTING);
 }
 

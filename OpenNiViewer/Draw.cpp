@@ -539,7 +539,7 @@ void drawInit()
 
 	CreateRainbowPallet();
 
-	setPreset(14);
+	setPreset(13);
 
 	TextureMapInit(&g_texBackground, 1024, 1024, 3, 1024, 1024);
 
