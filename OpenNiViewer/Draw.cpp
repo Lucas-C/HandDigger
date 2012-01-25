@@ -20,9 +20,6 @@
 *                                                                            *
 *****************************************************************************/
 
-
-
-
 // --------------------------------
 // Includes
 // --------------------------------
@@ -35,6 +32,7 @@
 #include "Capture.h"
 #include "Toolbox.h"
 #include "Macros.hpp"
+#include "Calibrater.h"
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
 	#include <GLUT/glut.h>
 	#include <OpenGL/gl.h>
@@ -53,7 +51,8 @@
 	#endif
 #endif
 
-
+#define CALIBRATION_AXIS
+#define CALIBRATION_USER
 #define USE_CENTERS_DETECTION
 #define USE_SLIDING_WINDOW_NONE
 #include "SlidingWindow.h"
@@ -76,6 +75,8 @@ SlidingWindow<Point> meanGoal;
 #define YUV_ALPHA  3
 #define YUV_RGBA_BPP 4
 
+
+extern bool gIsCalibrating;
 // --------------------------------
 // Types
 // --------------------------------
@@ -133,6 +134,8 @@ typedef struct DrawUserInput
 DrawUserInput g_DrawUserInput;
 
 float g_fMaxDepth;
+
+Calibrater Cal;
 
 DrawConfigPreset g_Presets[PRESET_COUNT] = 
 {
@@ -839,6 +842,25 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	}
 
 	const DepthMetaData* pDepthMetaData = getDepthMetaData();
+
+#ifdef CALIBRATION_AXIS
+
+	XnDepthPixel* pDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
+	if (isImageOn())
+	{
+		pImageMD = getImageMetaData();
+		pImage = const_cast<MapMetaData*>(pImageMD)->WritableData();
+		if (pImage == NULL) 
+		{
+			std::cerr << "pImage == NULL" << std::endl;
+		} 
+		else 
+		{
+			Cal.calibrage(pDepth, pImage);
+		}
+	}
+
+#endif
 
 #ifdef USE_CENTERS_DETECTION
 	// Récupération de la carte de profondeur

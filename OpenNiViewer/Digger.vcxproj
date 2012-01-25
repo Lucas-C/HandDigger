@@ -110,6 +110,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="Calibrater.cpp" />
     <ClCompile Include="Capture.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Digger.cpp" />
@@ -129,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
+    <ClInclude Include="Calibrater.h" />
     <ClInclude Include="Capture.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Digger.h" />
