@@ -53,7 +53,8 @@
 // --------------------------------
 #include <XnCppWrapper.h>
 
-bool gIsCalibrating = 0;
+bool gIsCalibratingAxis = 0;
+bool gIsCalibratingUser = 0;
 
 #if (XN_PLATFORM == XN_PLATFORM_LINUX_X86 || XN_PLATFORM == XN_PLATFORM_LINUX_ARM)
 	#define UNIX
@@ -285,9 +286,14 @@ void startCapture(int delay)
 	}
 }
 
-void setCalibratingOn(int dummy)
+void setCalibratingAxisOn(int dummy)
 {
-	gIsCalibrating = true;
+	gIsCalibratingAxis = true;
+}
+
+void setCalibratingUserOn(int dummy)
+{
+	gIsCalibratingUser = true;
 }
 
 void createKeyboardMap()
@@ -317,7 +323,8 @@ void createKeyboardMap()
 		{
 			registerKey('m', "Mirror on/off", toggleMirror, 0);
 			registerKey('/', "Reset all croppings", resetAllCropping, 0);
-			registerKey('n', "Calibration", setCalibratingOn, 0); 
+			registerKey('n', "Calibration Axis", setCalibratingAxisOn, 0); 
+			registerKey('u', "Calibration User", setCalibratingUserOn, 0); 
 		}
 		endKeyboardGroup();
 		startKeyboardGroup(KEYBOARD_GROUP_CAPTURE);

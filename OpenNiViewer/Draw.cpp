@@ -76,7 +76,8 @@ SlidingWindow<Point> meanGoal;
 #define YUV_RGBA_BPP 4
 
 
-extern bool gIsCalibrating;
+extern bool gIsCalibratingAxis;
+extern bool gIsCalibratingUser;
 // --------------------------------
 // Types
 // --------------------------------
@@ -844,22 +845,32 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	const DepthMetaData* pDepthMetaData = getDepthMetaData();
 
 #ifdef CALIBRATION_AXIS
-
-	XnDepthPixel* pDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
-	if (isImageOn())
+	if (gIsCalibratingAxis)
 	{
-		pImageMD = getImageMetaData();
-		pImage = const_cast<MapMetaData*>(pImageMD)->WritableData();
-		if (pImage == NULL) 
+		XnDepthPixel* pDepth = const_cast<unsigned short*>(pDepthMetaData->Data());
+		if (isImageOn())
 		{
-			std::cerr << "pImage == NULL" << std::endl;
-		} 
-		else 
-		{
-			//Cal.calibrage(pDepth, pImage);
+			pImageMD = getImageMetaData();
+			pImage = const_cast<MapMetaData*>(pImageMD)->WritableData();
+			if (pImage == NULL) 
+			{
+				std::cerr << "pImage == NULL" << std::endl;
+			} 
+			else 
+			{
+				Cal.calibrationAxis(pDepth, pImage);
+			}
 		}
+		gIsCalibratingAxis = 0;
 	}
+#endif
 
+#ifdef CALIBRATION_USER
+	if (gIsCalibratingUser)
+	{
+		Cal.calibrationUser(centres);
+		gIsCalibratingUser = 0;
+	}
 #endif
 
 #ifdef USE_CENTERS_DETECTION

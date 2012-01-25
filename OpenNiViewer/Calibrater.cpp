@@ -3,7 +3,11 @@
 
 Calibrater::Calibrater()
 {
-	mNumero = 0;
+	mNumberAxis = 0;
+	mNumberUser = 0;
+	mSheetColor[0] = 250;
+	mSheetColor[1] = 250;
+	mSheetColor[2] = 250;
 }
 
 Calibrater::~Calibrater()
@@ -62,11 +66,12 @@ void Calibrater::LookSheet(unsigned char * Image, unsigned short * DepthTab, int
 
 }
 
-void Calibrater::calibrage(unsigned short *Depth, unsigned char *Image)
+void Calibrater::calibrationAxis(unsigned short *Depth, unsigned char *Image)
 {
-	if (mNumero%2 == 0)
+	if (mNumberAxis%2 == 0)
 	{
 		LookSheet(Image, Depth, mSheetColor, &mFirstWidth, &mFirstHeight, &mFirstDepth);
+		mNumberAxis++;
 	}
 	else
 	{
@@ -78,6 +83,27 @@ void Calibrater::calibrage(unsigned short *Depth, unsigned char *Image)
 		mCoefBDepth = (mFirstDepth - mFirstRealMeasure)/mCoefADepth; 
 		mSheetWidth = 0.297;
 		mFocalLength = mFirstWidth*mFirstRealMeasure/mSheetWidth;
+		mNumberAxis++;
+	}
+}
+
+void Calibrater::calibrationUser(std::vector<Point> Centers)
+{
+	if (mNumberUser%4 == 0)
+	{
+		mNumberUser++;
+	}
+	else if (mNumberUser%4 == 1)
+	{
+		mNumberUser++;
+	}
+	else if (mNumberUser%4 == 2)
+	{
+		mNumberUser++;
+	}
+	else
+	{
+		mNumberUser++;
 	}
 }
 
