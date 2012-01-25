@@ -856,7 +856,7 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 		} 
 		else 
 		{
-			Cal.calibrage(pDepth, pImage);
+			//Cal.calibrage(pDepth, pImage);
 		}
 	}
 

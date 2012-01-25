@@ -549,7 +549,7 @@ void setPosDigger(const Point& pos)
 			M = oldM;
 			V = oldV;
 		} else {
-			TRACE_("\t pos = " << M);
+			//TRACE_("\t pos = " << M);
 		}
 	}
 }
