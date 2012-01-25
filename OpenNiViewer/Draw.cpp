@@ -888,7 +888,9 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 		Digger::setGoalDigger(goal * (1.0 / 40));
 	}
 	// Déplacement du godet
-	float angleGodet = Toolbox::calculAngle(centres[2], centres[3]);
+	// a remodifier : centres 2 et 3
+	float angleGodet = Toolbox::calculAngle(centres[1], centres[2]);
+	Digger::setGlobalShovelAngle(-angleGodet);
 
 #endif
 

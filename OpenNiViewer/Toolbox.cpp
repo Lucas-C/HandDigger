@@ -159,7 +159,7 @@ namespace Toolbox
 		int nbCentresOrangesTrouves = 0;
 		int nbCentresBleusTrouves = 0;
 		int nbCentresOrangesCherches = 2;
-		int nbCentresBleusCherches = 2;
+		int nbCentresBleusCherches = 1;
 
 		// On va travailler sur une copie de pImage (car il y aura des conversion HSV)
 		unsigned char * pVector = new unsigned char[width*height*lNbComp];
