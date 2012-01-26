@@ -92,18 +92,22 @@ void Calibrater::calibrationUser(std::vector<Point> Centers)
 	if (mNumberUser%4 == 0)
 	{
 		mNumberUser++;
+		mXmin = Centers[1].x - Centers[0].x;
 	}
 	else if (mNumberUser%4 == 1)
 	{
 		mNumberUser++;
+		mXmax = Centers[1].x - Centers[0].x;
 	}
 	else if (mNumberUser%4 == 2)
 	{
 		mNumberUser++;
+		mYmin = Centers[1].y - Centers[0].y;
 	}
 	else
 	{
 		mNumberUser++;
+		mYmax = Centers[1].y - Centers[0].y;
 	}
 }
 
