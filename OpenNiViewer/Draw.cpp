@@ -55,6 +55,8 @@
 #define CALIBRATION_USER
 #define USE_CENTERS_DETECTION
 #define USE_SLIDING_WINDOW_NONE
+//#define USE_SLIDING_WINDOW_MEAN
+//#define USE_SLIDING_WINDOW_EXP
 #include "SlidingWindow.h"
 #include "Point.h"
 SlidingWindow<Point> meanGoal;

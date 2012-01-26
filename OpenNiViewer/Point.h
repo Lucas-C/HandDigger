@@ -12,11 +12,11 @@ public:
 	Point() : x(0), y(0), z(0) {}
 	double squareNorm() const { return x * x + y * y + z * z; }
 	double norm() const { return sqrt(squareNorm()); }
-	Point operator*(double f) { return Point(x * f, y * f, z * f); }
-	Point operator/(double f) { return Point(x / f, y / f, z / f); }
+	Point operator*(double f) const { return Point(x * f, y * f, z * f); }
+	Point operator/(double f) const { return Point(x / f, y / f, z / f); }
 	double operator*(const Point& p) { return x*p.x + y*p.y + z*p.z; }
-	Point operator+(const Point& p) { return Point(x + p.x, y + p.y, z + p.z); }
-	Point operator-(const Point& p) { return Point(x - p.x, y - p.y, z - p.z); }
+	Point operator+(const Point& p) const { return Point(x + p.x, y + p.y, z + p.z); }
+	Point operator-(const Point& p) const { return Point(x - p.x, y - p.y, z - p.z); }
 	std::ostream& operator>>(std::ostream &strm) const {
 		return strm << "  " << x << "  " << y << "  " << z;
 	}

@@ -16,9 +16,7 @@ private:
 	std::deque<T> memory_;
 
 public:
-	SlidingWindowMean(int windowSize = 15) : mean_(), windowSize_(windowSize), memory_() {
-		memory_.reserve(windowSize_);
-	}
+	SlidingWindowMean(int windowSize = 15) : mean_(), windowSize_(windowSize), memory_() {}
 
 	void push(const T& value) {
 		const unsigned int memSize = memory_.size();
@@ -50,7 +48,7 @@ public:
 		mean_ = mean_ * (1 - alpha_) + value * alpha_;
 	}
 
-	double mean() { return mean_; }
+	T mean() { return mean_; }
 };
 
 template<typename T>
