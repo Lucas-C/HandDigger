@@ -89,25 +89,39 @@ void Calibrater::calibrationAxis(unsigned short *Depth, unsigned char *Image)
 
 void Calibrater::calibrationUser(std::vector<Point> Centers)
 {
-	if (mNumberUser%4 == 0)
+	double x0, y0, prof0;
+	KinectToCamera(Centers[0].x, Centers[0].y, Centers[0].z, &x0, &y0, &prof0);
+	double x1, y1, prof1;
+	KinectToCamera(Centers[1].x, Centers[1].y, Centers[1].z, &x1, &y1, &prof1);
+	if (mNumberUser%6 == 0)
 	{
 		mNumberUser++;
-		mXmin = Centers[1].x - Centers[0].x;
+		mXmin = x1 - x0;
 	}
-	else if (mNumberUser%4 == 1)
+	else if (mNumberUser%6 == 1)
 	{
 		mNumberUser++;
-		mXmax = Centers[1].x - Centers[0].x;
+		mXmax = x1 - x0;
 	}
-	else if (mNumberUser%4 == 2)
+	else if (mNumberUser%6 == 2)
 	{
 		mNumberUser++;
-		mYmin = Centers[1].y - Centers[0].y;
+		mYmin = y1 - y0;
 	}
-	else
+	else if (mNumberUser%6 == 3)
 	{
 		mNumberUser++;
-		mYmax = Centers[1].y - Centers[0].y;
+		mYmax = y1 - y0;
+	}
+	else if (mNumberUser%6 == 4)
+	{
+		mNumberUser++;
+		mProfmin = prof1 - prof0;
+	}
+	else if (mNumberUser%6 == 5)
+	{
+		mNumberUser++;
+		mProfmax = prof1 - prof0;
 	}
 }
 
@@ -116,6 +130,13 @@ void Calibrater::KinectToCamera(double Kinectx, double Kinecty, double Kinectpro
 	*Worldprof = (Kinectprof - mCoefBDepth)/mCoefADepth;
 	*Worldx = (Kinectx-320.0)*(*Worldprof)/mFocalLength;
 	*Worldy = (Kinecty-240.0)*(*Worldprof)/mFocalLength;
+}
+
+void Calibrater::CameraToShovel(double VecWorldx, double VecWorldy, double VecWorldprof, double *Shovelx, double *Shovely, double *Shovelz)
+{
+	*Shovelx = VecWorldx/(mXmax-mXmin);
+	*Shovely = VecWorldy/(mYmax-mYmin);
+	*Shovelz = VecWorldprof/(mProfmax - mProfmin);
 }
 
 void Calibrater::setSheetColor(int r, int g, int b)
