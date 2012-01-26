@@ -53,8 +53,8 @@ const double	upperArmLength		= 5,
 				lowerArmLength		= 5,
 				diggerHandRadius	= 0.5,
 				diggerHandWidth		= 1.5,
-				distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 1.5,
-				vitesseMax			= 0.2; // Vitesse maximum de déplacement du bras
+				distMaxSquared		= (upperArmLength * upperArmLength) + (lowerArmLength * lowerArmLength) * 2,
+				vitesseMax			= 0.1; // Vitesse maximum de déplacement du bras
 
 // Aesthetic ones
 const double	jointRadius	= 0.3f,
@@ -83,7 +83,8 @@ int		totalFrames	= 0;
 Point computeVfromM();
 // Global point variables
 Point O, goal(6, 0, 1), V(computeVfromM()), M(goal);
-double shovelAngle = 0; // Shovel inclinaison
+double	shovelAngle = 0,	 // Shovel inclinaison
+		shovelAngleGoal = 0;
 
 
 /*** Model-related functions ***/
@@ -302,9 +303,10 @@ void drawXYGrid(int gridSize)
 	glEnd();
 }
 
-void drawCabin() {
+void drawCabin(double angle) {
 	glColor3d(0.75f, 0.75f, 0.75f);
 	glPushMatrix();
+		glRotatef(angle / M_PI * 180, 0, 0, 1);
 		glTranslatef(-jointRadius - cabinSize / 2, 0, 0);
 		glutSolidCube(cabinSize);
 	glPopMatrix();
@@ -347,8 +349,9 @@ void drawShovel(const Point& p, double theta)
 					majorStep = diggerHandWidth / numMajor,
 					minorStep = M_PI / numMinor,
 					flatNorm = sqrt(p.x * p.x + p.y * p.y),
-					shiftCoeff = 1 + (jointRadius + diggerHandRadius) / flatNorm;
+					shiftCoeff = 1 + jointRadius / flatNorm;
 	glColor3d(0.f, 0.7f, 0.f);
+	TRACE_(theta);
 	glPushMatrix();
 		glTranslatef(p.x * shiftCoeff, p.y * shiftCoeff, p.z);
 		// We use spherical coordinates
@@ -356,15 +359,15 @@ void drawShovel(const Point& p, double theta)
 			glRotatef(acos(p.x / flatNorm) / M_PI * 180, 0, 0, 1);
 		else
 			glRotatef(-acos(p.x / flatNorm) / M_PI * 180, 0, 0, 1);
-		glRotatef(90, 0, 1, 0);
+		glRotatef(90 - theta / M_PI * 180, 0, 1, 0);
 		for (int i = 0; i < numMajor; ++i) {
 			GLdouble y0 = 0.5 * diggerHandWidth - i * majorStep;
 			GLdouble y1 = y0 - majorStep;
 			glBegin(GL_TRIANGLE_STRIP);
 			for (int j = 0; j <= numMinor; ++j) {
-				double a = j * minorStep + M_PI / 2 + theta;
+				double a = j * minorStep + M_PI / 2;
 				GLdouble x = diggerHandRadius * cos(a);
-				GLdouble z = diggerHandRadius * sin(a);
+				GLdouble z = diggerHandRadius * (1 + sin(a));
 				glNormal3d(x / diggerHandRadius, 0.0, z / diggerHandRadius);
 				glTexCoord2d(j / (GLdouble) numMinor, i / (GLdouble) numMajor);
 				glVertex3d(x, y0, z);
@@ -386,8 +389,12 @@ void renderModels()
 
 	updatePosDigger();
 
+	double	norm = M.norm(),
+			xNormed = M.x / norm,
+			yNormed = M.y / norm;
+
 	glEnable(GL_LIGHTING);
-		drawCabin();
+		drawCabin(2 * atan(yNormed / (1 + xNormed)));
 		drawJoint(O);
 		drawArm(O, V);
 		drawJoint(V);
@@ -528,11 +535,6 @@ void arrowKeyCallback(int key, int x, int y)
 	keyboardCallback((unsigned char)key, x, y);
 }
 
-void setGlobalShovelAngle(double theta)
-{
-	shovelAngle = theta;
-}
-
 void setPosDigger(const Point& pos)
 {
 	//TRACE_("Pcandidate = " << pos);
@@ -560,12 +562,24 @@ void setGoalDigger(const Point& g)
 	if (g.x > 0
 	&&	g.squareNorm() < distMaxSquared) {
 		goal = g;
-		TRACE_("\t goal = " << goal);
+		//TRACE_("\t goal = " << goal);
 	}
+}
+
+void setGlobalShovelAngle(double theta)
+{
+	shovelAngle = theta;
+}
+
+void setGoalGlobalShovelAngle(double theta)
+{
+	shovelAngleGoal = theta;
 }
 
 void updatePosDigger()
 {
+	shovelAngle += vitesseMax * (shovelAngleGoal - shovelAngle);
+
 	Point direction(goal - M);
 	double normDirection = sqrt(direction.squareNorm());
 	if (normDirection > vitesseMax) {

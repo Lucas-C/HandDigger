@@ -7,20 +7,24 @@ namespace Toolbox
 	bool surMarqueur(int redValue, int greenValue, int blueValue, MarqueurId &marqId)
 	{
 		// Pour l'instant, requiert que les valeurs rgb entrées soient celles de la représentation RGB
-		if (redValue == 0 && greenValue > 80 && blueValue > 150 && marqId == VIDE) {      // Eclairé
+		if (redValue < 10 && greenValue > 80 && blueValue > 140 && marqId == VIDE) {      // Eclairé
 		//if (redValue < 20 && greenValue > 130 && blueValue > 50 && marqId == VIDE) {       // Salle d'immersion
+		//if (redValue < 5 && greenValue > 180 && blueValue > 80 && marqId == VIDE) {     // Night
 			marqId = ORANGE;
 			return true;
-		} else if (redValue > 150 && greenValue > 100 && blueValue > 50 && marqId == VIDE) {   // Eclairé
+		} else if (redValue > 150 && greenValue > 80 && blueValue > 80 && marqId == VIDE) {   // Eclairé
 		//} else if (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100 && marqId == VIDE) {   // Salle d'immersion
+		//} else if (redValue > 120 && greenValue < 100 && blueValue < 170 && marqId == VIDE) {   // Night
 			marqId = BLEU;
 			return true;
 		} else if (marqId == ORANGE) {
-			return (redValue == 0 && greenValue > 80 && blueValue > 150);   // Eclairé
+			return (redValue < 10 && greenValue > 80 && blueValue > 140);   // Eclairé
 			//return (redValue < 20 && greenValue > 130 && blueValue > 50);    // Salle d'immersion
+			//return (redValue < 5 && greenValue > 180 && blueValue > 80);     // Night
 		} else if (marqId == BLEU) {
-			return (redValue > 150 && greenValue > 100 && blueValue > 50);       // Eclairé
+			return (redValue > 150 && greenValue > 80 && blueValue > 80);       // Eclairé
 			//return (redValue < 10 && greenValue > 80 && greenValue < 120 && blueValue > 50 && blueValue < 100);    // Salle d'immersion
+			//return (redValue > 120 && greenValue < 100 && blueValue < 170);    // Night
 		} else {
 			return false;
 		}
@@ -159,7 +163,7 @@ namespace Toolbox
 		int nbCentresOrangesTrouves = 0;
 		int nbCentresBleusTrouves = 0;
 		int nbCentresOrangesCherches = 2;
-		int nbCentresBleusCherches = 1;
+		int nbCentresBleusCherches = 2;
 
 		// On va travailler sur une copie de pImage (car il y aura des conversion HSV)
 		unsigned char * pVector = new unsigned char[width*height*lNbComp];
@@ -216,21 +220,32 @@ namespace Toolbox
 					int blueCompD = pVector[lNbComp * (i*lWidth + j + hauteur/4) + 2];
 
 					// Si la hauteur est inférieure à une hauteur minimale, ou si l'un des pixels "voisins" gauche ou droite n'est pas un marqueur, on considère qu'il ne s'agit pas du marqueur
-					if (hauteur >= 20 && surMarqueur(redCompG, greenCompG, blueCompG, mID) && surMarqueur(redCompD, greenCompD, blueCompD, mID)) {
+					if (hauteur >= 10 && surMarqueur(redCompG, greenCompG, blueCompG, mID) && surMarqueur(redCompD, greenCompD, blueCompD, mID)) {
 
 						// Détermination du centre du marqueur
 						int xCentre = j;
 						int yCentre = i + (hauteur/2);
 
-						// On recherche un centre déjà trouvé et se trouvant près du nouveau centre
-						int rayonSecteur = 2*hauteur;
+						// On recherche un centre de même couleur déjà trouvé et se trouvant près du nouveau centre
+						int rayonSecteur = 4*hauteur;
 						bool dejaTrouve = false;
-						for (int k = 0; k < listeCentres.size(); k++) {
-							if ( xCentre - rayonSecteur < listeCentres[k].x && xCentre + rayonSecteur > listeCentres[k].x
-							&& yCentre - rayonSecteur < listeCentres[k].y && yCentre + rayonSecteur > listeCentres[k].y )
-							{
-								dejaTrouve = true;
-								break;
+						if (mID == ORANGE) {
+							for (int k = 0; k < nbCentresOrangesCherches; k++) {
+								if ( xCentre - rayonSecteur < listeCentres[k].x && xCentre + rayonSecteur > listeCentres[k].x
+								&& yCentre - rayonSecteur < listeCentres[k].y && yCentre + rayonSecteur > listeCentres[k].y )
+								{
+									dejaTrouve = true;
+									break;
+								}
+							}
+						} else if (mID == BLEU) {
+							for (int k = nbCentresOrangesCherches; k < nbCentresOrangesCherches + nbCentresBleusCherches; k++) {
+								if ( xCentre - rayonSecteur < listeCentres[k].x && xCentre + rayonSecteur > listeCentres[k].x
+								&& yCentre - rayonSecteur < listeCentres[k].y && yCentre + rayonSecteur > listeCentres[k].y )
+								{
+									dejaTrouve = true;
+									break;
+								}
 							}
 						}
 
@@ -324,7 +339,7 @@ namespace Toolbox
 	}
 
 
-	void remplirProfondeur(unsigned short * depth, std::vector<Point> centres, int width, int height)
+	void remplirProfondeur(unsigned short * depth, std::vector<Point> &centres, int width, int height)
 	{
 		int lWidth =  width;
 		int lHeight = height;
@@ -360,6 +375,7 @@ namespace Toolbox
 	float calculAngle(Point p1, Point p2)
 	{
 		Point segment(p2 - p1);
+		segment.z = 0.0;
 		float segNorm = sqrt(segment.squareNorm());
 		segment = segment / segNorm;
 		Point axe(1.0, 0.0, 0.0);
