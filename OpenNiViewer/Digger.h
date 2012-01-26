@@ -11,6 +11,7 @@ namespace Digger
 	void setPosDigger(const Point& pos);
 	void setGoalDigger(const Point& g);
 	void setGlobalShovelAngle(double theta); // "world" angle
+	void setGoalGlobalShovelAngle(double theta); // "world" angle
 
 	void mouseCallback(int, int, int, int);
 	void motionCallback(int, int);

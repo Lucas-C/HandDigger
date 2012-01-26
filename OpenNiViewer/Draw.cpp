@@ -55,9 +55,15 @@
 #define CALIBRATION_USER
 #define USE_CENTERS_DETECTION
 #define USE_SLIDING_WINDOW_NONE
+//#define USE_SLIDING_WINDOW_MEAN
+//#define USE_SLIDING_WINDOW_EXP
 #include "SlidingWindow.h"
 #include "Point.h"
 SlidingWindow<Point> meanGoal;
+double goalScaleX = 40;
+double goalScaleY = 100;
+double goalScaleZ = 40;
+
 
 // --------------------------------
 // Defines
@@ -154,7 +160,7 @@ DrawConfigPreset g_Presets[PRESET_COUNT] =
 	{ "Rainbow Depth on Image",				{ false, false, { RAINBOW,			  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Cyclic Rainbow Depth on Image",		{ false, false, { CYCLIC_RAINBOW,	  0.6 }, { IMAGE_NORMAL },			OVERLAY } },
 	{ "Image Only",							{ false, false, { DEPTH_OFF,			1 }, { IMAGE_NORMAL },			OVERLAY } },
-	{ "Hand Digger - Model3D",				{ false, true,  { DEPTH_OFF,			1 }, { IMAGE_OFF },				OVERLAY } },	//	@@@dded
+	{ "Hand Digger - Model3D",				{ false, true,  { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			OVERLAY } },	//	@@@dded
 	{ "Hand Digger - Three pannels",		{ false, true,  { LINEAR_HISTOGRAM,		1 }, { IMAGE_NORMAL },			THREE_PANNELS } },	//	@@@dded
 };
 
@@ -800,9 +806,6 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	if (g_DrawConfig.Streams.bBackground)
 		TextureMapDraw(&g_texBackground, pLocation);
 
-	if (g_DrawConfig.Streams.Image.Coloring == IMAGE_OFF)
-		return;
-
 	const MapMetaData* pImageMD;
 	XnUInt8* pImage = NULL;
 	std::vector<Point> centres;	//	@@@dded
@@ -894,16 +897,28 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 	goal = meanGoal.mean();
 
 	if (!absurdeAvtArr) {
-		if (absurdeGcheDte)
+		if (absurdeGcheDte) {
 			goal.y = 0;
-		Digger::setGoalDigger(goal * (1.0 / 40));
+		}
+		goal.x /= goalScaleX;
+		goal.y /= goalScaleY;
+		goal.z /= goalScaleZ;
+		Digger::setGoalDigger(goal);
 	}
 	// Déplacement du godet
-	// a remodifier : centres 2 et 3
-	float angleGodet = Toolbox::calculAngle(centres[1], centres[2]);
-	Digger::setGlobalShovelAngle(-angleGodet);
-
+	bool absurdeGodet = false;   // Vaut vrai quand la variation des positions (déplacement avant-arrière) de centre est trop importante
+	if ((centres[2].x == pImageMD->XRes()-1 && centres[2].y == pImageMD->YRes()-1) || (centres[3].x == pImageMD->XRes()-1 && centres[3].y == pImageMD->YRes()-1)) {
+		absurdeGodet = true;
+	}
+	if (!absurdeGodet) {
+		// a remodifier : centres 2 et 3
+		float angleGodet = Toolbox::calculAngle(centres[2], centres[3]);
+		Digger::setGoalGlobalShovelAngle(-1.2*angleGodet);    // angle augmenté (garder ou enlever selon la liberté de rotation)
+	}
 #endif
+
+	if (g_DrawConfig.Streams.bModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY)	// @@@dded
+		return;
 
 	for (XnUInt16 nY = pImageMD->YOffset(); nY < pImageMD->YRes() + pImageMD->YOffset(); nY++)
 	{
@@ -988,6 +1003,9 @@ void drawColorImage(UIntRect* pLocation, UIntPair* pPointer)
 
 void drawDepth(UIntRect* pLocation, UIntPair* pPointer)
 {
+	if (g_DrawConfig.Streams.bModel3D && g_DrawConfig.Streams.ScreenArrangement == OVERLAY)	// @@@dded
+		return;
+
 	if (g_DrawConfig.Streams.Depth.Coloring != DEPTH_OFF)
 	{
 		if (!isDepthOn())
@@ -1663,14 +1681,14 @@ void drawFrame()
 
 		if (g_DrawConfig.Streams.Depth.Coloring == LINEAR_HISTOGRAM || g_DrawConfig.bShowPointer)
 			calculateHistogram();
-
-		drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
-
-		drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
-
-		printStatisticsInfo();
-		printRecordingInfo();
 	}
+
+	drawColorImage(&g_DrawConfig.ImageLocation, bOverImage ? &pointerInImage : NULL);
+
+	drawDepth(&g_DrawConfig.DepthLocation, bOverDepth ? &pointerInDepth : NULL);
+
+	printStatisticsInfo();
+	printRecordingInfo();
 
 	// @@@dded
 	static bool overlayModel3D = false;

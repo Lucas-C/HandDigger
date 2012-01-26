@@ -23,7 +23,7 @@ namespace Toolbox {
 	// Convention : centre[0] (vert) défini la l'extrémité du bras et centres[1] (bleu) sa base
 	void placerMarqueurs(unsigned char * image, std::vector<Point> centres, int width, int height);
 
-	void remplirProfondeur(unsigned short * depth, std::vector<Point> centres, int width, int height);
+	void remplirProfondeur(unsigned short * depth, std::vector<Point> &centres, int width, int height);
 
 	// Va placer régler centre[0] et centre[1] (convention : le centre le plus à gauche sur l'image est la base du bras) et centre[2] et centre[3] (convention : centre[2] est le point arrière du godet)
 	void followLeftConvention(std::vector<Point>& centres);

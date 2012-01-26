@@ -68,6 +68,7 @@ void Calibrater::LookSheet(unsigned char * Image, unsigned short * DepthTab, int
 
 void Calibrater::calibrationAxis(unsigned short *Depth, unsigned char *Image)
 {
+	std::cout << "Calibration..." << std::endl;
 	if (mNumberAxis%2 == 0)
 	{
 		LookSheet(Image, Depth, mSheetColor, &mFirstWidth, &mFirstHeight, &mFirstDepth);
